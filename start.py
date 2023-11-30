@@ -26,6 +26,8 @@ def get_polygon_vertices(polygon_name):
 
 def update_vertices(new_vertices, polygon_name):
     global vertices1, vertices2
+    if new_vertices and not check_convex_polygon(new_vertices):
+        st.error(f"The {polygon_name} polygon is not convex, check the vertices again")
     if polygon_name == "P":
         vertices1 = new_vertices
     else:
@@ -35,13 +37,14 @@ def update_vertices(new_vertices, polygon_name):
 def show_polygon_page():
     st.title("Initialize Polygons")
 
-    # selected_tab = st.radio("Select Polygon", ["Polygon P", "Polygon Q"])
-    #
-    # if selected_tab == "Polygon P":
-    initialize_polygon_tab("P")
+    selected_tab = st.radio("Select Polygon", ["Polygon P", "Polygon Q"])
+
+    if selected_tab == "Polygon P":
+        initialize_polygon_tab("P")
+    else:
+        initialize_polygon_tab("Q")
     st.subheader("Plot visualization")
     st.plotly_chart(visualize_polygons(), use_container_width=True)
-    initialize_polygon_tab("Q")
 
 
 def handle_input_file(polygon_name):
@@ -77,20 +80,30 @@ def initialize_vertices(num_vertices, vertices):
     return vertices
 
 
+def add_point(figure, point, colour, name):
+    figure.add_trace(go.Scatter(x=[point[0]], y=[point[1]], mode='markers',
+                                marker=dict(size=12, color=f"{colour}"), name=f"{name}"))
+
+
+def add_line(figure, point, other_point, colour, name):
+    figure.add_trace(go.Scatter(x=[point[0], other_point[0]], y=[point[1], other_point[1]], mode='lines',
+                                line=dict(color=f'{colour}'), name=f"{name}"))
+
+
 def visualize_polygons():
     global vertices1, vertices2
-    fig = go.Figure()
+    figure = go.Figure()
     if len(vertices1) > 0:
         x1, y1 = zip(*vertices1)
-        fig.add_trace(go.Scatter(x=list(x1) + [x1[0]], y=list(y1) + [y1[0]], mode='lines+markers', marker=dict(size=10),
-                                 line=dict(color='blue'), name="Polygon P"))
+        figure.add_trace(go.Scatter(x=list(x1) + [x1[0]], y=list(y1) + [y1[0]], mode='lines+markers',
+                                    marker=dict(size=10), line=dict(color='blue'), name="Polygon P"))
 
     if len(vertices2) > 0:
         x2, y2 = zip(*vertices2)
-        fig.add_trace(go.Scatter(x=list(x2) + [x2[0]], y=list(y2) + [y2[0]], mode='lines+markers', marker=dict(size=10),
-                                 line=dict(color='orange'), name="Polygon Q"))
+        figure.add_trace(go.Scatter(x=list(x2) + [x2[0]], y=list(y2) + [y2[0]], mode='lines+markers',
+                                    marker=dict(size=10), line=dict(color='orange'), name="Polygon Q"))
 
-    return fig
+    return figure
 
 
 def initialize_polygon_tab(polygon_name):
@@ -99,8 +112,8 @@ def initialize_polygon_tab(polygon_name):
     selected_option = st.checkbox(f"Type the coordinates manually for {polygon_name}")
     if selected_option:
         update_vertices([], polygon_name)
-        num_vertices = st.number_input("How many vertices do you want to enter?", min_value=3, max_value=20, value=3,
-                                       step=1)
+        num_vertices = st.number_input(f"How many vertices do you want to enter for {polygon_name}?",
+                                       min_value=3, max_value=20, value=3, step=1)
         vertices = initialize_vertices(num_vertices, vertices)
 
     st.write("If these are the coordinates you want, press the following button:")
@@ -108,5 +121,3 @@ def initialize_polygon_tab(polygon_name):
     if locked:
         vertices = convert_counterclockwise(vertices)
         update_vertices(vertices, polygon_name)
-        if not check_convex_polygon(vertices):
-            st.error(f"The {polygon_name} polygon is not convex, check the vertices again")

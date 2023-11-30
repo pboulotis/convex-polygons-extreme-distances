@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import streamlit as st
 from shapely.geometry import Point, LineString
 
 
@@ -27,6 +26,8 @@ def cross_product(a, b, c):
 
 
 def check_convex_polygon(vertices):
+    if not vertices:
+        return True
     for i in range(len(vertices)):
         a = vertices[i]
         b = vertices[(i + 1) % len(vertices)]
@@ -74,7 +75,7 @@ def line_equation(point, vertex, test_point):
     return x * (py - qy) - y * (px - qx) + px * qy - py * qx
 
 
-def find_tangents(polygon, point, u_w_flag):
+def find_tangents(polygon, point):
     tangents = [None, None]
 
     for vertex in polygon:

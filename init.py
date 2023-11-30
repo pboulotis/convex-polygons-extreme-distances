@@ -1,82 +1,104 @@
-from matplotlib import pyplot as plt
-import utils
-import shapely.geometry as sg
+import streamlit as st
+import plotly.graph_objs as go
+from start import get_polygon_vertices, visualize_polygons, add_point, add_line
+from utils import find_tangents, get_selected_vertices
+
+p_list, q_list = None, None
 
 
-def original_plot(vertices1, vertices2, ax):
-    ax.clear()
-    polygon1, polygon2 = sg.Polygon(vertices1), sg.Polygon(vertices2)
-    ax.fill(*polygon1.exterior.xy, alpha=0.5, label='P')
-    ax.fill(*polygon2.exterior.xy, alpha=0.5, label='Q')
-    ax.legend()
-    ax.axis('equal')
+def get_p_q_lists():
+    global p_list, q_list
+    return p_list, q_list
 
 
-def plot_tangents(ax, lower_tangent1, lower_tangent2, point1, point2, upper_tangent1, upper_tangent2):
-    point_x1, point_y1 = point1
-    # ax.annotate('u', (point_x1, point_y1 - 0.25), xytext=(0, 10), textcoords='offset points')
-    ax.text(point_x1, point_y1 - 0.15, 'u')
+def show_u_w(vertices1, vertices2):
+    u = None
+    w = None
+    figure = visualize_polygons()
+    st.write("We choose u and w, as arbitrary points in P and Q, respectively")
+    selected_u_vertex = st.selectbox("Select a vertex for u", vertices1, format_func=lambda v: f"({v[0]}, {v[1]})")
+    if selected_u_vertex != u:
+        u = selected_u_vertex
 
-    lt_x1, lt_y1 = lower_tangent1
-    ax.plot([point_x1, lt_x1], [point_y1, lt_y1], 'b--', label='Q tangent lines')
+    selected_w_vertex = st.selectbox("Select a vertex for w", vertices2, format_func=lambda v: f"({v[0]}, {v[1]})")
+    if selected_w_vertex != w:
+        w = selected_w_vertex
 
-    ut_x1, ut_y1 = upper_tangent1
-    ax.plot([point_x1, ut_x1], [point_y1, ut_y1], 'b--')
+    add_point(figure, u, "green", "u")
+    add_point(figure, w, "red", "w")
 
-    point_x2, point_y2 = point2
-    ax.text(point_x2, point_y2, 'w')
+    st.plotly_chart(figure, use_container_width=True)
 
-    lt_x2, lt_y2 = lower_tangent2
-    ax.plot([point_x2, lt_x2], [point_y2, lt_y2], 'g--', label='P tangent lines')
-
-    ut_x2, ut_y2 = upper_tangent2
-    ax.plot([point_x2, ut_x2], [point_y2, ut_y2], 'g--')
-
-
-def plot_p_q_prime_lists(ax, vertices1, vertices2, p_prime_list, q_prime_list):
-    original_plot(vertices1, vertices2, ax)
-
-    u_lower = p_prime_list[0]
-    u_upper = p_prime_list[-1]
-    ax.text(u_lower[0], u_lower[1], "u'")
-    ax.text(u_upper[0], u_upper[1], "u''")
-
-    w_lower = q_prime_list[-1]
-    w_upper = q_prime_list[0]
-    ax.text(w_lower[0], w_lower[1], "w'")
-    ax.text(w_upper[0], w_upper[1], "w''")
-
-    for i in range(len(p_prime_list) - 1):
-        plt.plot([p_prime_list[i][0], p_prime_list[i + 1][0]],
-                 [p_prime_list[i][1], p_prime_list[i + 1][1]], color='black')
-
-    for i in range(len(q_prime_list) - 1):
-        plt.plot([q_prime_list[i][0], q_prime_list[i + 1][0]],
-                 [q_prime_list[i][1], q_prime_list[i + 1][1]], color='black')
-
-    plt.draw()
+    return u, w
 
 
-def initial_phase(vertices1, vertices2, ax):
-    point_u = vertices1[2]
-    point_w = vertices2[2]
+def show_u_tangents(u, vertices2):
+    figure = visualize_polygons()
+    w_lower, w_upper = find_tangents(vertices2, u)
+    st.write("We compute the two lines V' and V'' that pass through u and are tangent to Q."
+             "Now w' and w'' are the vertices closest to u where V' and V'' touch Q")
+    add_point(figure, u, "green", "u")
+    add_line(figure, u, w_lower, "green", "V'")
+    figure.add_annotation(go.layout.Annotation(x=w_lower[0], y=w_lower[1], text="w'"))
+    add_line(figure, u, w_upper, "purple", "V''")
 
-    # Find the tangent vertices
-    lower_tangent1, upper_tangent1 = utils.find_tangents(vertices2, point_u, "u")
-    lower_tangent2, upper_tangent2 = utils.find_tangents(vertices1, point_w, "w")
+    figure.add_annotation(go.layout.Annotation(x=w_upper[0], y=w_upper[1], text="w''"))
 
-    plot_tangents(ax, lower_tangent1, lower_tangent2, point_u, point_w, upper_tangent1, upper_tangent2)
+    st.plotly_chart(figure, use_container_width=True)
 
-    u_lower, u_upper = lower_tangent2, upper_tangent2
-    w_lower, w_upper = lower_tangent1, upper_tangent1
+    return w_lower, w_upper
 
-    p_prime_list = utils.get_selected_vertices(vertices1, u_lower, u_upper)
-    q_prime_list = utils.get_selected_vertices(vertices2, w_upper, w_lower)
 
-    # new_button = Button(btn, "Compute P' and Q'")
-    # new_button.set_active(True)
-    # new_button.on_clicked(lambda event: plot_p_q_prime_lists(ax, vertices1, vertices2, p_prime_list, q_prime_list))
+def show_w_tangents(w, vertices1, w_lower, w_upper):
+    figure = visualize_polygons()
+    u_lower, u_upper = find_tangents(vertices1, w)
+    st.write("We compute the two lines W' and W'' that pass through w and are tangent to P."
+             "Now u' and u'' are the vertices closest to w where W' and W'' touch P")
+    add_point(figure, w, "red", "w")
+    figure.add_annotation(go.layout.Annotation(x=w_lower[0], y=w_lower[1], text="w'"))
+    figure.add_annotation(go.layout.Annotation(x=w_upper[0], y=w_upper[1], text="w''"))
+    add_line(figure, w, u_lower, "green", "W'")
+    figure.add_annotation(go.layout.Annotation(x=u_lower[0], y=u_lower[1], text="u'"))
+    add_line(figure, w, u_upper, "purple", "W''")
+    figure.add_annotation(go.layout.Annotation(x=u_upper[0], y=u_upper[1], text="u''"))
 
-    # plot_p_q_prime_lists()
+    st.plotly_chart(figure, use_container_width=True)
 
-    return p_prime_list, q_prime_list
+    return u_lower, u_upper
+
+
+def show_p_q_lists(p_list, q_list):
+    figure = visualize_polygons()
+
+    figure.add_annotation(go.layout.Annotation(x=q_list[0][0], y=q_list[0][1], text="w''"))
+    figure.add_annotation(go.layout.Annotation(x=q_list[-1][0], y=q_list[-1][1], text="w'"))
+    figure.add_annotation(go.layout.Annotation(x=p_list[-1][0], y=p_list[-1][1], text="u''"))
+    figure.add_annotation(go.layout.Annotation(x=p_list[0][0], y=p_list[0][1], text="u'"))
+
+    x1, y1 = zip(*p_list)
+    figure.add_trace(go.Scatter(x=list(x1), y=list(y1), mode='lines+markers', marker=dict(size=10),
+                                line=dict(color='green'), name="P'"))
+
+    x2, y2 = zip(*q_list)
+    figure.add_trace(go.Scatter(x=list(x2), y=list(y2), mode='lines+markers', marker=dict(size=10),
+                                line=dict(color='red'), name="Q'"))
+
+    st.plotly_chart(figure, use_container_width=True)
+    return figure
+
+
+def show_initial_phase_page():
+    global p_list, q_list
+    st.title("Initial Phase")
+    vertices1, vertices2 = get_polygon_vertices("P"), get_polygon_vertices("Q")
+
+    if not vertices1 or not vertices2:
+        st.info("Please fill the vertices first")
+    else:
+        u, w = show_u_w(vertices1, vertices2)
+        w_lower, w_upper = show_u_tangents(u, vertices2)
+        u_lower, u_upper = show_w_tangents(w, vertices1, w_lower, w_upper)
+        p_list = get_selected_vertices(vertices1, u_lower, u_upper)
+        q_list = get_selected_vertices(vertices2, w_upper, w_lower)
+        st.write("We choose the sequences from u' to u'' as P' and from w'' to w' as Q'")
+        show_p_q_lists(p_list, q_list)
