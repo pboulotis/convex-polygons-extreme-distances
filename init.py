@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objs as go
-from start import get_polygon_vertices, visualize_polygons, add_point, add_line
+from start import get_polygon_vertices, visualize_polygons, add_point, add_line, add_vertices
 from utils import find_tangents, get_selected_vertices
 
 p_list, q_list = None, None
@@ -67,21 +67,16 @@ def show_w_tangents(w, vertices1, w_lower, w_upper):
     return u_lower, u_upper
 
 
-def show_p_q_lists(p_list, q_list):
+def show_p_q_lists(p, q):
     figure = visualize_polygons()
 
-    figure.add_annotation(go.layout.Annotation(x=q_list[0][0], y=q_list[0][1], text="w''"))
-    figure.add_annotation(go.layout.Annotation(x=q_list[-1][0], y=q_list[-1][1], text="w'"))
-    figure.add_annotation(go.layout.Annotation(x=p_list[-1][0], y=p_list[-1][1], text="u''"))
-    figure.add_annotation(go.layout.Annotation(x=p_list[0][0], y=p_list[0][1], text="u'"))
+    figure.add_annotation(go.layout.Annotation(x=q[0][0], y=q[0][1], text="w''"))
+    figure.add_annotation(go.layout.Annotation(x=q[-1][0], y=q[-1][1], text="w'"))
+    figure.add_annotation(go.layout.Annotation(x=p[-1][0], y=p[-1][1], text="u''"))
+    figure.add_annotation(go.layout.Annotation(x=p[0][0], y=p[0][1], text="u'"))
 
-    x1, y1 = zip(*p_list)
-    figure.add_trace(go.Scatter(x=list(x1), y=list(y1), mode='lines+markers', marker=dict(size=10),
-                                line=dict(color='green'), name="P'"))
-
-    x2, y2 = zip(*q_list)
-    figure.add_trace(go.Scatter(x=list(x2), y=list(y2), mode='lines+markers', marker=dict(size=10),
-                                line=dict(color='red'), name="Q'"))
+    add_vertices(figure, p, "green", "P'")
+    add_vertices(figure, q, "red", "Q'")
 
     st.plotly_chart(figure, use_container_width=True)
     return figure

@@ -113,3 +113,35 @@ def get_selected_vertices(vertices, start, end):
         return vertices[start_idx:end_idx + 1]
 
     return vertices[start_idx:] + vertices[:end_idx + 1]
+
+
+def get_neighbour_vertices(vertices):
+    index = len(vertices) // 2
+    if index + 1 == len(vertices):
+        return vertices[index - 1], vertices[0]
+    return vertices[index - 1], vertices[index + 1]
+
+
+# def calculate_slope(point1, point2):
+#     x1, y1 = point1
+#     x2, y2 = point2
+#     if x2 - x1 == 0:
+#         return float('inf')
+#     # return sys.maxint
+#     return float(y2 - y1) / (x2 - x1)
+#
+#
+# def calculate_angle(point1, point2, point3, point4):
+#     m1 = calculate_slope(point1, point2)
+#     m2 = calculate_slope(point3, point4)
+#
+#     angle = abs((m2 - m1) / (1 + m1 * m2))
+#     ret = math.atan(angle)
+#
+#     return (ret * 180) / math.pi
+
+
+def get_angle(a, b, c):
+    ang = math.degrees(math.atan2(c[1] - b[1], c[0] - b[0]) - math.atan2(a[1] - b[1], a[0] - b[0]))
+    return np.round(ang, 2)
+    # return ang + 360 if ang < 0 else ang

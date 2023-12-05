@@ -80,14 +80,21 @@ def initialize_vertices(num_vertices, vertices):
     return vertices
 
 
-def add_point(figure, point, colour, name):
+def add_point(figure, point, color, name):
     figure.add_trace(go.Scatter(x=[point[0]], y=[point[1]], mode='markers',
-                                marker=dict(size=12, color=f"{colour}"), name=f"{name}"))
+                                marker=dict(size=12, color=f"{color}"), name=f"{name}"))
 
 
-def add_line(figure, point, other_point, colour, name):
+def add_line(figure, point, other_point, color, name):
     figure.add_trace(go.Scatter(x=[point[0], other_point[0]], y=[point[1], other_point[1]], mode='lines',
-                                line=dict(color=f'{colour}'), name=f"{name}"))
+                                line=dict(color=f'{color}'), name=f"{name}"))
+
+
+def add_vertices(figure, vertices, color, name):
+    if len(vertices) > 0:
+        x, y = zip(*vertices)
+        figure.add_trace(go.Scatter(x=list(x), y=list(y), mode='lines+markers',
+                                    marker=dict(size=10), line=dict(color=f'{color}'), name=f"{name}"))
 
 
 def visualize_polygons():
