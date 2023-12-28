@@ -109,6 +109,9 @@ def get_selected_vertices(vertices, start, end):
     start_idx = vertices.index(start)
     end_idx = vertices.index(end)
 
+    if start == end:
+        return [start]
+
     if start_idx < end_idx:
         return vertices[start_idx:end_idx + 1]
 
@@ -141,7 +144,25 @@ def get_neighbour_vertices(vertices):
 #     return (ret * 180) / math.pi
 
 
-def get_angle(a, b, c):
+def is_angle_negative(a, b, c):
     ang = math.degrees(math.atan2(c[1] - b[1], c[0] - b[0]) - math.atan2(a[1] - b[1], a[0] - b[0]))
-    return np.round(ang, 2)
-    # return ang + 360 if ang < 0 else ang
+    return True if ang < 0 else False
+
+
+def get_angle(a, b, c):
+    if a == b or b == c or a == c:
+        return None
+
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+
+    ba = a - b
+    bc = c - b
+
+    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+    angle = np.arccos(cosine_angle)
+    angle = np.round(np.degrees(angle), 2)
+    if is_angle_negative(a, b, c):
+        return angle * (-1)
+    return angle

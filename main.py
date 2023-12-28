@@ -2,6 +2,7 @@ import streamlit as st
 from algorithm import handle_page
 from start import show_polygon_page, visualize_polygons, update_vertices
 from init import show_initial_phase_page, get_p_q_lists
+from tester import handle_test
 
 
 def show_home_page():
@@ -27,7 +28,7 @@ def show_algorithm_page():
 
     p_list, q_list = get_p_q_lists()
     if not p_list or not q_list:
-        st.info("Complete the initial phase first by selecting it from the sidebar on the left")
+        st.warning("Complete the initial phase first by selecting it from the sidebar on the left")
     else:
         st.write("For the following steps we will name the first vertex of P' (u') as p1 and the last (u'') as p2.")
         st.write("Likewise for the Q' the last vertex (w') as q1 and the first (w'') as q2, due to the counter "
@@ -35,14 +36,26 @@ def show_algorithm_page():
         handle_page(p_list, q_list)
 
 
+def show_final_phase_page():
+    st.title("Final Phase")
+
+
+def show_tester_page():
+    handle_test()
+
 
 if __name__ == "__main__":
-    page = st.sidebar.selectbox("Select Page", ["Home", "Polygon coordinates", "Initial Phase", "Algorithm"])
+    page = st.sidebar.selectbox("Select Page", ["Home", "Polygon coordinates", "Initial Phase",
+                                                "Algorithm", "Final Phase", "Tester"])
     if page == "Home":
         show_home_page()
     elif page == "Polygon coordinates":
         show_polygon_page()
     elif page == "Initial Phase":
         show_initial_phase_page()
-    else:
+    elif page == "Algorithm":
         show_algorithm_page()
+    elif page == "Tester":
+        show_tester_page()
+    else:
+        show_final_phase_page()

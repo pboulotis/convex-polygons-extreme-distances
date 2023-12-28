@@ -35,7 +35,7 @@ def show_u_w(vertices1, vertices2):
 def show_u_tangents(u, vertices2):
     figure = visualize_polygons()
     w_lower, w_upper = find_tangents(vertices2, u)
-    st.write("We compute the two lines V' and V'' that pass through u and are tangent to Q."
+    st.write("We compute the two lines V' and V'' that pass through u and are tangent to Q. "
              "Now w' and w'' are the vertices closest to u where V' and V'' touch Q")
     add_point(figure, u, "green", "u")
     add_line(figure, u, w_lower, "green", "V'")
@@ -52,7 +52,7 @@ def show_u_tangents(u, vertices2):
 def show_w_tangents(w, vertices1, w_lower, w_upper):
     figure = visualize_polygons()
     u_lower, u_upper = find_tangents(vertices1, w)
-    st.write("We compute the two lines W' and W'' that pass through w and are tangent to P."
+    st.write("We compute the two lines W' and W'' that pass through w and are tangent to P. "
              "Now u' and u'' are the vertices closest to w where W' and W'' touch P")
     add_point(figure, w, "red", "w")
     figure.add_annotation(go.layout.Annotation(x=w_lower[0], y=w_lower[1], text="w'"))
@@ -88,7 +88,7 @@ def show_initial_phase_page():
     vertices1, vertices2 = get_polygon_vertices("P"), get_polygon_vertices("Q")
 
     if not vertices1 or not vertices2:
-        st.info("Please fill the vertices first")
+        st.warning("Please fill the vertices first")
     else:
         u, w = show_u_w(vertices1, vertices2)
         w_lower, w_upper = show_u_tangents(u, vertices2)
@@ -97,3 +97,4 @@ def show_initial_phase_page():
         q_list = get_selected_vertices(vertices2, w_upper, w_lower)
         st.write("We choose the sequences from u' to u'' as P' and from w'' to w' as Q'")
         show_p_q_lists(p_list, q_list)
+        st.info("You can now go to the Algorithm page")

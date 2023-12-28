@@ -27,7 +27,8 @@ def get_polygon_vertices(polygon_name):
 def update_vertices(new_vertices, polygon_name):
     global vertices1, vertices2
     if new_vertices and not check_convex_polygon(new_vertices):
-        st.error(f"The {polygon_name} polygon is not convex, check the vertices again")
+        st.error(f"The {polygon_name} polygon is not convex, check the vertices again and"
+                 f" that you have typed the coordinates counter clockwise")
     if polygon_name == "P":
         vertices1 = new_vertices
     else:
@@ -67,7 +68,7 @@ def handle_input_file(polygon_name):
         update_vertices(vertices, polygon_name)
 
 
-def initialize_vertices(num_vertices, vertices):
+def initialize_vertices(num_vertices, vertices, polygon_name):
     if not vertices:
         vertices = []
     st.subheader(f"Type the (x,y) coordinates of the {num_vertices} vertices of the polygon:")
@@ -76,6 +77,8 @@ def initialize_vertices(num_vertices, vertices):
         x, y = VertexInput(f"{i + 1}").write()
         if x is not None and y is not None:
             vertices.append((x, y))
+
+    update_vertices(vertices, polygon_name)
 
     return vertices
 
@@ -91,7 +94,7 @@ def add_line(figure, point, other_point, color, name):
 
 
 def add_vertices(figure, vertices, color, name):
-    if len(vertices) > 0:
+    if len(vertices) > 1:
         x, y = zip(*vertices)
         figure.add_trace(go.Scatter(x=list(x), y=list(y), mode='lines+markers',
                                     marker=dict(size=10), line=dict(color=f'{color}'), name=f"{name}"))
@@ -100,15 +103,24 @@ def add_vertices(figure, vertices, color, name):
 def visualize_polygons():
     global vertices1, vertices2
     figure = go.Figure()
-    if len(vertices1) > 0:
+    figure.update_xaxes(
+        scaleanchor="y",
+        scaleratio=1,
+    )
+    # figure.update_layout(width=650, height=650)
+    if len(vertices1) > 0 and check_convex_polygon(vertices1):
         x1, y1 = zip(*vertices1)
         figure.add_trace(go.Scatter(x=list(x1) + [x1[0]], y=list(y1) + [y1[0]], mode='lines+markers',
                                     marker=dict(size=10), line=dict(color='blue'), name="Polygon P"))
+    else:
+        add_vertices(figure, vertices1, "blue", "Polygon P")
 
-    if len(vertices2) > 0:
+    if len(vertices2) > 0 and check_convex_polygon(vertices2):
         x2, y2 = zip(*vertices2)
         figure.add_trace(go.Scatter(x=list(x2) + [x2[0]], y=list(y2) + [y2[0]], mode='lines+markers',
                                     marker=dict(size=10), line=dict(color='orange'), name="Polygon Q"))
+    else:
+        add_vertices(figure, vertices2, "orange", "polygon Q")
 
     return figure
 
@@ -121,7 +133,11 @@ def initialize_polygon_tab(polygon_name):
         update_vertices([], polygon_name)
         num_vertices = st.number_input(f"How many vertices do you want to enter for {polygon_name}?",
                                        min_value=3, max_value=20, value=3, step=1)
-        vertices = initialize_vertices(num_vertices, vertices)
+        vertices = initialize_vertices(num_vertices, vertices, polygon_name)
+        reset = st.button(f"Reset {polygon_name} coordinates")
+        if reset:
+            update_vertices([], polygon_name)
+            # st.session_state.selected_option = not st.session_state.checkbox_state
 
     st.write("If these are the coordinates you want, press the following button:")
     locked = st.button(f"Lock coordinates for {polygon_name}")
