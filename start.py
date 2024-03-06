@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 
-from utils import check_convex_polygon, convert_counterclockwise
+from utils import is_convex_polygon, convert_counterclockwise
 
 vertices1, vertices2 = [], []
 
@@ -26,7 +26,7 @@ def get_polygon_vertices(polygon_name):
 
 def update_vertices(new_vertices, polygon_name):
     global vertices1, vertices2
-    if new_vertices and not check_convex_polygon(new_vertices):
+    if new_vertices and not is_convex_polygon(new_vertices):
         st.error(f"The {polygon_name} polygon is not convex, check the vertices again and"
                  f" that you have typed the coordinates counter clockwise")
     if polygon_name == "P":
@@ -108,14 +108,14 @@ def visualize_polygons():
         scaleratio=1,
     )
     # figure.update_layout(width=650, height=650)
-    if len(vertices1) > 0 and check_convex_polygon(vertices1):
+    if len(vertices1) > 0 and is_convex_polygon(vertices1):
         x1, y1 = zip(*vertices1)
         figure.add_trace(go.Scatter(x=list(x1) + [x1[0]], y=list(y1) + [y1[0]], mode='lines+markers',
                                     marker=dict(size=10), line=dict(color='blue'), name="Polygon P"))
     else:
         add_vertices(figure, vertices1, "blue", "Polygon P")
 
-    if len(vertices2) > 0 and check_convex_polygon(vertices2):
+    if len(vertices2) > 0 and is_convex_polygon(vertices2):
         x2, y2 = zip(*vertices2)
         figure.add_trace(go.Scatter(x=list(x2) + [x2[0]], y=list(y2) + [y2[0]], mode='lines+markers',
                                     marker=dict(size=10), line=dict(color='orange'), name="Polygon Q"))

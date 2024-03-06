@@ -83,7 +83,6 @@ def check_cases2(p_list, q_list, medians, angles):
     return p_list, q_list
 
 
-# TODO: check the angles if they are correct
 def handle_case3_1(p_list, q_list, medians, angles):
     if angles[1] + angles[3] > 180:
         if angles[1] > 90:
@@ -100,24 +99,15 @@ def handle_case3_1(p_list, q_list, medians, angles):
 
 
 def handle_case3_2(p_list, q_list, medians, angles):
-    if angles[0] <= 0:
+    if angles[0] <= 0 or angles[0] >= 180:
+        p_list = get_selected_vertices(p_list, medians[0], p_list[-1])
+    if angles[1] <= 0 or angles[1] >= 180:
         p_list = get_selected_vertices(p_list, p_list[0], medians[0])
-    if angles[1] <= 0:
-        p_list = get_selected_vertices(p_list, medians[0], p_list[0])
-    if angles[2] >= 180:
-        q_list = get_selected_vertices(q_list, q_list[0], medians[1])
-    if angles[3] >= 180:
+    if angles[2] >= 180 or angles[2] <= 0:
         q_list = get_selected_vertices(q_list, medians[1], q_list[-1])
+    if angles[3] >= 180 or angles[3] <= 0:
+        q_list = get_selected_vertices(q_list, q_list[0], medians[1])
 
-    # TODO 2 and 3
-    #     if angles[2] <= 0:
-    #         p_list = get_selected_vertices(p_list, p_list[0], medians[0])
-    #     if angles[3] <= 0:
-    #         p_list = get_selected_vertices(p_list, medians[0], p_list[0])
-    #     if angles[0] >= 180:
-    #         q_list = get_selected_vertices(q_list, q_list[0], medians[1])
-    #     if angles[1] >= 180:
-    #         q_list = get_selected_vertices(q_list, medians[1], q_list[-1])
     return p_list, q_list
 
 

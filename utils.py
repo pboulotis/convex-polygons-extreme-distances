@@ -25,7 +25,7 @@ def cross_product(a, b, c):
     return ab[0] * bc[1] - ab[1] * bc[0]
 
 
-def check_convex_polygon(vertices):
+def is_convex_polygon(vertices):
     if not vertices:
         return True
     for i in range(len(vertices)):
@@ -125,25 +125,6 @@ def get_neighbour_vertices(vertices):
     return vertices[index - 1], vertices[index + 1]
 
 
-# def calculate_slope(point1, point2):
-#     x1, y1 = point1
-#     x2, y2 = point2
-#     if x2 - x1 == 0:
-#         return float('inf')
-#     # return sys.maxint
-#     return float(y2 - y1) / (x2 - x1)
-#
-#
-# def calculate_angle(point1, point2, point3, point4):
-#     m1 = calculate_slope(point1, point2)
-#     m2 = calculate_slope(point3, point4)
-#
-#     angle = abs((m2 - m1) / (1 + m1 * m2))
-#     ret = math.atan(angle)
-#
-#     return (ret * 180) / math.pi
-
-
 def is_angle_negative(a, b, c):
     ang = math.degrees(math.atan2(c[1] - b[1], c[0] - b[0]) - math.atan2(a[1] - b[1], a[0] - b[0]))
     return True if ang < 0 else False
@@ -166,3 +147,38 @@ def get_angle(a, b, c):
     if is_angle_negative(a, b, c):
         return angle * (-1)
     return angle
+
+
+def calculate_slope(a, b):
+    return (b[1] - a[1]) / (b[0] - a[0])
+
+
+def calculate_projection_x(a, c, slope, reverse_slope):
+    return (c[1] - (reverse_slope * c[0]) - a[1] + (slope * a[0])) / (slope - reverse_slope)
+
+
+def calculate_projection_y(c, slope2, x):
+    return c[1] + slope2 * (x - c[0])
+
+
+def is_projection_between_ab(a, b, d):
+    total_dist = np.round(euclidean_distance(a, b), 2)
+    return total_dist == (np.round(euclidean_distance(a, d), 2) + np.round(euclidean_distance(b, d), 2))
+
+
+def check_orthogonal_projection(a, b, c):
+    projection_point = [None, None]
+    if a[0] == b[0]:
+        projection_point[0] = a[0]
+        projection_point[1] = c[1]
+    elif a[1] == b[1]:
+        projection_point[0] = c[0]
+        projection_point[1] = a[1]
+    else:
+        slope1 = calculate_slope(a, b)
+        reverse_slope = - 1 / slope1
+        projection_point[0] = calculate_projection_x(a, c, slope1, reverse_slope)
+        projection_point[1] = calculate_projection_y(c, reverse_slope, projection_point[0])
+    if not is_projection_between_ab(a, b, projection_point):
+        return False
+    return projection_point
