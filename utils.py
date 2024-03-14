@@ -132,7 +132,7 @@ def is_angle_negative(a, b, c):
 
 def get_angle(a, b, c):
     if a == b or b == c or a == c:
-        return None
+        return 0  # TODO
 
     a = np.array(a)
     b = np.array(b)
@@ -157,16 +157,16 @@ def calculate_projection_x(a, c, slope, reverse_slope):
     return (c[1] - (reverse_slope * c[0]) - a[1] + (slope * a[0])) / (slope - reverse_slope)
 
 
-def calculate_projection_y(c, slope2, x):
-    return c[1] + slope2 * (x - c[0])
+def calculate_projection_y(c, reverse_slope, x):
+    return c[1] + (reverse_slope * (x - c[0]))
 
 
-def is_projection_between_ab(a, b, d):
+def is_projection_between_ab_line(a, b, d):
     total_dist = np.round(euclidean_distance(a, b), 2)
     return total_dist == (np.round(euclidean_distance(a, d), 2) + np.round(euclidean_distance(b, d), 2))
 
 
-def check_orthogonal_projection(a, b, c):
+def get_orthogonal_projection(a, b, c):
     projection_point = [None, None]
     if a[0] == b[0]:
         projection_point[0] = a[0]
@@ -179,6 +179,6 @@ def check_orthogonal_projection(a, b, c):
         reverse_slope = - 1 / slope1
         projection_point[0] = calculate_projection_x(a, c, slope1, reverse_slope)
         projection_point[1] = calculate_projection_y(c, reverse_slope, projection_point[0])
-    if not is_projection_between_ab(a, b, projection_point):
+    if not is_projection_between_ab_line(a, b, projection_point):
         return False
     return projection_point

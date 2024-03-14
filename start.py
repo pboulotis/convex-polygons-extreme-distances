@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 
 from utils import is_convex_polygon, convert_counterclockwise
 
-vertices1, vertices2 = [], []
+polygon_p, polygon_q = [], []
 
 
 class VertexInput:
@@ -18,21 +18,21 @@ class VertexInput:
 
 
 def get_polygon_vertices(polygon_name):
-    global vertices1, vertices2
+    global polygon_p, polygon_q
     if polygon_name == "P":
-        return vertices1
-    return vertices2
+        return polygon_p
+    return polygon_q
 
 
 def update_vertices(new_vertices, polygon_name):
-    global vertices1, vertices2
+    global polygon_p, polygon_q
     if new_vertices and not is_convex_polygon(new_vertices):
         st.error(f"The {polygon_name} polygon is not convex, check the vertices again and"
-                 f" that you have typed the coordinates counter clockwise")
+                 f" that you have typed the coordinates in the correct order")
     if polygon_name == "P":
-        vertices1 = new_vertices
+        polygon_p = new_vertices
     else:
-        vertices2 = new_vertices
+        polygon_q = new_vertices
 
 
 def show_polygon_page():
@@ -45,7 +45,7 @@ def show_polygon_page():
     else:
         initialize_polygon_tab("Q")
     st.subheader("Plot visualization")
-    st.plotly_chart(visualize_polygons(), use_container_width=True)
+    st.plotly_chart(visualise_polygons(), use_container_width=True)
 
 
 def handle_input_file(polygon_name):
@@ -64,7 +64,7 @@ def handle_input_file(polygon_name):
                 x, y = map(float, line.split(','))
                 vertices.append((x, y))
             except ValueError:
-                st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line.")
+                st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line...")
         update_vertices(vertices, polygon_name)
 
 
@@ -100,27 +100,27 @@ def add_vertices(figure, vertices, color, name):
                                     marker=dict(size=10), line=dict(color=f'{color}'), name=f"{name}"))
 
 
-def visualize_polygons():
-    global vertices1, vertices2
+def visualise_polygons():
+    global polygon_p, polygon_q
     figure = go.Figure()
     figure.update_xaxes(
         scaleanchor="y",
         scaleratio=1,
     )
     # figure.update_layout(width=650, height=650)
-    if len(vertices1) > 0 and is_convex_polygon(vertices1):
-        x1, y1 = zip(*vertices1)
+    if len(polygon_p) > 0 and is_convex_polygon(polygon_p):
+        x1, y1 = zip(*polygon_p)
         figure.add_trace(go.Scatter(x=list(x1) + [x1[0]], y=list(y1) + [y1[0]], mode='lines+markers',
                                     marker=dict(size=10), line=dict(color='blue'), name="Polygon P"))
     else:
-        add_vertices(figure, vertices1, "blue", "Polygon P")
+        add_vertices(figure, polygon_p, "blue", "Polygon P")
 
-    if len(vertices2) > 0 and is_convex_polygon(vertices2):
-        x2, y2 = zip(*vertices2)
+    if len(polygon_q) > 0 and is_convex_polygon(polygon_q):
+        x2, y2 = zip(*polygon_q)
         figure.add_trace(go.Scatter(x=list(x2) + [x2[0]], y=list(y2) + [y2[0]], mode='lines+markers',
                                     marker=dict(size=10), line=dict(color='orange'), name="Polygon Q"))
     else:
-        add_vertices(figure, vertices2, "orange", "polygon Q")
+        add_vertices(figure, polygon_q, "orange", "polygon Q")
 
     return figure
 

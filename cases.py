@@ -1,11 +1,11 @@
 import streamlit as st
 import plotly.graph_objs as go
-from start import add_vertices, visualize_polygons, add_line, add_point
-from utils import get_selected_vertices
+from start import add_vertices, visualise_polygons, add_line, add_point
+from utils import get_selected_vertices, get_orthogonal_projection
 
 
 def show_figure(p_list, q_list):
-    figure = visualize_polygons()
+    figure = visualise_polygons()
 
     add_vertices(figure, p_list, "green", "P'")
     add_vertices(figure, q_list, "red", "Q'")
@@ -36,18 +36,22 @@ def show_case1_p(q_list, mq, angles):
     st.write(f"b'' = {angles[2]}")
     st.write(f"b' = {angles[3]}")
     if angles[2] >= 90:
-        q_list = get_selected_vertices(q_list, mq, q_list[-1])
-    if angles[3] >= 90:
         q_list = get_selected_vertices(q_list, q_list[0], mq)
+    if angles[3] >= 90:
+        q_list = get_selected_vertices(q_list, mq, q_list[-1])
+
     return q_list
 
 
 def show_case1_q(p_list, mp, angles):
     st.write("Case 1: Q' contains only one vertex, changing the P' sequence")
+    st.write(f"a'' = {angles[0]}")
+    st.write(f"a' = {angles[1]}")
     if angles[0] >= 90:
-        p_list = get_selected_vertices(p_list, mp, p_list[-1])
-    if angles[1] >= 90:
         p_list = get_selected_vertices(p_list, p_list[0], mp)
+    if angles[1] >= 90:
+        p_list = get_selected_vertices(p_list, mp, p_list[-1])
+
     return p_list
 
 
@@ -61,24 +65,76 @@ def check_cases1(p_list, q_list, medians, angles):
     return p_list, q_list
 
 
-# TODO
-def show_case2_p(q_list, mq, angles):
+def show_case2_p(p_list, q_list, mq, angles):
     st.write("Case 2: P' contains only two vertices")
-    return q_list
+    st.write(f"a'' = {angles[0]}")
+    st.write(f"a' = {angles[1]}")
+    st.write(f"b'' = {angles[2]}")
+    st.write(f"b' = {angles[3]}")
+
+    if angles[1] >= 0:
+        if angles[1] + angles[3] > 180:
+            if angles[1] >= 90:
+                p_list = [p_list[0]]  # TODO
+            if angles[3] >= 90:
+                q_list = get_selected_vertices(q_list, q_list[0], mq)
+
+        if angles[2] >= 90:
+            q_list = get_selected_vertices(q_list, mq, q_list[-1])
+
+        if angles[1] < angles[2] < 90:
+            if get_orthogonal_projection(p_list[0], p_list[1], mq):
+                q_list = get_selected_vertices(q_list, mq, q_list[-1])
+            else:
+                p_list = [p_list[1]]  # TODO
+    else:
+        p_list = [p_list[1]]  # TODO
+        if angles[2] >= 180:
+            q_list = get_selected_vertices(q_list, q_list[0], mq)
+        if angles[3] >= 180:
+            q_list = get_selected_vertices(q_list, mq, q_list[-1])
+
+    return p_list, q_list
 
 
-# TODO
-def show_case2_q(p_list, mp, angles):
+def show_case2_q(p_list, q_list, mp, angles):
     st.write("Case 2: Q' contains only two vertices")
-    return p_list
+    st.write(f"a'' = {angles[0]}")
+    st.write(f"a' = {angles[1]}")
+    st.write(f"b'' = {angles[2]}")
+    st.write(f"b' = {angles[3]}")
+
+    if angles[3] >= 0:
+        if angles[1] + angles[3] > 180:
+            if angles[3] >= 90:
+                q_list = [q_list[0]]  # TODO
+            if angles[1] >= 90:
+                p_list = get_selected_vertices(p_list, p_list[0], mp)
+
+        if angles[0] >= 90:
+            p_list = get_selected_vertices(p_list, mp, p_list[-1])
+
+        if angles[3] < angles[0] < 90:
+            if get_orthogonal_projection(q_list[0], q_list[1], mp):
+                p_list = get_selected_vertices(p_list, mp, p_list[-1])
+            q_list = [q_list[1]]  # TODO
+
+    else:
+        q_list = [q_list[1]]  # TODO
+        if angles[1] >= 180:
+            p_list = get_selected_vertices(p_list, p_list[0], mp)
+        if angles[0] >= 180:
+            p_list = get_selected_vertices(p_list, mp, p_list[-1])
+
+    return p_list, q_list
 
 
 def check_cases2(p_list, q_list, medians, angles):
     if len(p_list) == 2:
-        q_list = show_case2_p(q_list, medians[1], angles)
+        p_list, q_list = show_case2_p(p_list, q_list, medians[1], angles)
         show_figure(p_list, q_list)
     elif len(q_list) == 2:
-        p_list = show_case2_q(p_list, medians[0], angles)
+        p_list, q_list = show_case2_q(p_list, q_list, medians[0], angles)
         show_figure(p_list, q_list)
     return p_list, q_list
 

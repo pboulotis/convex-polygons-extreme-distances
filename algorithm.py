@@ -1,12 +1,12 @@
 import streamlit as st
 import plotly.graph_objs as go
 import cases
-from start import add_point, add_line, add_vertices, visualize_polygons
+from start import add_point, add_line, add_vertices, visualise_polygons
 from utils import get_neighbour_vertices, get_selected_vertices, get_angle
 
 
 def get_main_figure(p_list, q_list, annotations=True):
-    figure = visualize_polygons()
+    figure = visualise_polygons()
 
     add_vertices(figure, p_list, "green", "P'")
     add_vertices(figure, q_list, "red", "Q'")
@@ -94,7 +94,7 @@ def compute_angles_medians(p_list, q_list):
 
 def binary_elimination(p_list, q_list):
     iteration = 1
-    while iteration < 4:
+    while len(p_list) > 2 or len(q_list) > 2:
         st.subheader(f"Iteration {iteration}:")
         angles, medians = (compute_angles_medians(p_list, q_list))
         st.write(f"angles:{angles}")
@@ -102,8 +102,8 @@ def binary_elimination(p_list, q_list):
         p_list, q_list = cases.check_cases2(p_list, q_list, medians, angles)
         p_list, q_list = cases.check_cases3(p_list, q_list, medians, angles)
         iteration = iteration + 1
-    if len(p_list) < 2 and len(q_list) < 2:
-        st.info("You can now go to the Final Phase page")
+    st.info("You can now go to the Final Phase page")
+    return p_list, q_list
 
 
 def handle_page(p_list, q_list):
@@ -118,4 +118,4 @@ def handle_page(p_list, q_list):
     st.write("Case 2: One of the sequences contains only two vertices")
     st.write("Case 3: Both sequences contain at least three vertices each")
 
-    binary_elimination(p_list, q_list)
+    return binary_elimination(p_list, q_list)
