@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objs as go
-from start import get_polygon_vertices, visualise_polygons, add_point, add_line, add_vertices
+from polygon_handling import get_polygon_vertices, visualise_polygons, add_point, add_line, add_vertices
 from utils import find_tangents, get_selected_vertices
 
 p_list, q_list = None, None
@@ -11,21 +11,23 @@ def get_p_q_lists():
     return p_list, q_list
 
 
-def update_p_q_lists(p, q):
+def set_p_q_lists(p, q):
     global p_list, q_list
     p_list, q_list = p, q
 
 
-def show_u_w(vertices1, vertices2):
+def show_u_w(polygon_p, polygon_q):
     u = None
     w = None
     figure = visualise_polygons()
     st.write("We choose u and w, as arbitrary points in P and Q, respectively")
-    selected_u_vertex = st.selectbox("Select a vertex for u", vertices1, format_func=lambda v: f"({v[0]}, {v[1]})")
+    selected_u_vertex = st.selectbox("Select an u vertex from P polygon", polygon_p,
+                                     format_func=lambda vertex: f"({vertex[0]}, {vertex[1]})")
     if selected_u_vertex != u:
         u = selected_u_vertex
 
-    selected_w_vertex = st.selectbox("Select a vertex for w", vertices2, format_func=lambda v: f"({v[0]}, {v[1]})")
+    selected_w_vertex = st.selectbox("Select an w vertex from Q polygon", polygon_q,
+                                     format_func=lambda vertex: f"({vertex[0]}, {vertex[1]})")
     if selected_w_vertex != w:
         w = selected_w_vertex
 
@@ -37,9 +39,9 @@ def show_u_w(vertices1, vertices2):
     return u, w
 
 
-def show_u_tangents(u, vertices2):
+def show_u_tangents(u, polygon_q):
     figure = visualise_polygons()
-    w_lower, w_upper = find_tangents(vertices2, u)
+    w_lower, w_upper = find_tangents(polygon_q, u)
     st.write("We compute the two lines V' and V'' that pass through u and are tangent to Q. "
              "Now w' and w'' are the vertices closest to u where V' and V'' touch Q")
     add_point(figure, u, "green", "u")
@@ -54,9 +56,9 @@ def show_u_tangents(u, vertices2):
     return w_lower, w_upper
 
 
-def show_w_tangents(w, vertices1, w_lower, w_upper):
+def show_w_tangents(w, polygon_p, w_lower, w_upper):
     figure = visualise_polygons()
-    u_lower, u_upper = find_tangents(vertices1, w)
+    u_lower, u_upper = find_tangents(polygon_p, w)
     st.write("We compute the two lines W' and W'' that pass through w and are tangent to P. "
              "Now u' and u'' are the vertices closest to w where W' and W'' touch P")
     add_point(figure, w, "red", "w")
@@ -89,11 +91,12 @@ def show_p_q_lists(p, q):
 
 def show_initial_phase_page():
     global p_list, q_list
-    st.title("Initial Phase")
+    st.subheader("Initial Phase")
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
 
     if not polygon_p or not polygon_q:
-        st.warning("Please fill the vertices first")
+        st.warning("Please fill the vertices first using the 'Polygon coordinates' tab or by selecting an example on "
+                   "the 'Home' tab")
     else:
         u, w = show_u_w(polygon_p, polygon_q)
         w_lower, w_upper = show_u_tangents(u, polygon_q)
@@ -102,4 +105,16 @@ def show_initial_phase_page():
         q_list = get_selected_vertices(polygon_q, w_upper, w_lower)
         st.write("We choose the sequences from u' to u'' as P' and from w'' to w' as Q'")
         show_p_q_lists(p_list, q_list)
-        st.info("You can now go to the Algorithm page")
+
+
+def get_initial_phase_result_no_display():
+    global p_list, q_list
+    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
+    u = polygon_p[0]
+    w = polygon_q[-1]
+    w_lower, w_upper = find_tangents(polygon_q, u)
+    u_lower, u_upper = find_tangents(polygon_p, w)
+    p_list = get_selected_vertices(polygon_p, u_lower, u_upper)
+    q_list = get_selected_vertices(polygon_q, w_upper, w_lower)
+
+    return p_list, q_list

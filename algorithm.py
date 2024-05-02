@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly.graph_objs as go
-import cases
-from start import add_point, add_line, add_vertices, visualise_polygons
-from utils import get_neighbour_vertices, get_selected_vertices, get_angle
+from cases import check_cases, check_cases_no_display
+from polygon_handling import add_point, add_line, add_vertices, visualise_polygons
+from utils import get_neighbour_vertices, get_angle
 
 
 def get_main_figure(p_list, q_list, annotations=True):
@@ -12,10 +12,10 @@ def get_main_figure(p_list, q_list, annotations=True):
     add_vertices(figure, q_list, "red", "Q'")
 
     if annotations:
-        figure.add_annotation(go.layout.Annotation(x=p_list[0][0], y=p_list[0][1], text="p1"))
-        figure.add_annotation(go.layout.Annotation(x=p_list[-1][0], y=p_list[-1][1], text="p2"))
-        figure.add_annotation(go.layout.Annotation(x=q_list[0][0], y=q_list[0][1], text="q2"))
-        figure.add_annotation(go.layout.Annotation(x=q_list[-1][0], y=q_list[-1][1], text="q1"))
+        figure.add_annotation(go.layout.Annotation(x=p_list[0][0], y=p_list[0][1], text="p₁"))
+        figure.add_annotation(go.layout.Annotation(x=p_list[-1][0], y=p_list[-1][1], text="p₂"))
+        figure.add_annotation(go.layout.Annotation(x=q_list[0][0], y=q_list[0][1], text="q₂"))
+        figure.add_annotation(go.layout.Annotation(x=q_list[-1][0], y=q_list[-1][1], text="q₁"))
 
     return figure
 
@@ -24,63 +24,32 @@ def show_medians(p_list, q_list, figure):
     mp = p_list[len(p_list) // 2]
     mq = q_list[len(q_list) // 2]
 
-    st.write("We compute the median mp in the P' list as well as the median mq in the Q' list."
-             " Thus drawing the line that connects them, m = s(mp,mq)")
+    st.write("We compute the median mₚ in the P' list as well as the median m₍q₎ in the Q' list."
+             " Thus drawing the line that connects them, m = s(mₚ,m₍q₎)")
     add_line(figure, mp, mq, "purple", "m")
-    add_point(figure, mp, "yellow", "mp")
-    add_point(figure, mq, "cyan", "mq")
+    add_point(figure, mp, "yellow", "mₚ")
+    add_point(figure, mq, "cyan", "m₍q₎")
     st.plotly_chart(figure)
 
 
-def show_angles(p_list, q_list, medians, angles):
-    figure = get_main_figure(p_list, q_list, annotations=False)
-    add_line(figure, medians[0], medians[1], "purple", "m")
-
+def show_angle_example():
     st.write("In order to execute the binary elimination algorithm, we will need to calculate the angles created from "
              "the m line that connects the median vertices as well as the edges with their neighbour vertices.")
-    st.write("More specifically, ei-1 and ei are the edges with the previous and next neighbouring vertices of mp."
-             "Likewise the fj-1 and fj are the edges with the previous and next neighbouring vertices of mq.")
+    st.write("More specifically, eᵢ₋₁ and eᵢ are the edges with the previous and next neighbouring vertices of mₚ."
+             "Likewise the fⱼ₋₁ and fⱼ are the edges with the previous and next neighbouring vertices of m₍q₎.")
     st.write("Now we distinguish the following angles:")
-    st.write("α' the angle from ei-1 to m and α'' the angle from m to ei")
-    st.write("β' the angle from m to fj and β'' the angle from fj-1 to m")
-    prev_mp, next_mp = get_neighbour_vertices(p_list)
-    prev_mq, next_mq = get_neighbour_vertices(q_list)
-
-    selected_vertices_p = get_selected_vertices(p_list, prev_mp, next_mp)
-    add_vertices(figure, selected_vertices_p, "yellow", "ei-1,mp,ei")
-
-    if angles[0] != 0:
-        figure.add_annotation(go.layout.Annotation(x=medians[0][0] + 0.05, y=medians[0][1] + 0.15,
-                                                   text="α''", arrowcolor="red"))
-    if angles[1] != 0:
-        figure.add_annotation(go.layout.Annotation(x=medians[0][0] + 0.15, y=medians[0][1] - 0.05,
-                                                   text="α'", arrowcolor="red", ax=20, ay=20))
-
-    selected_vertices_q = get_selected_vertices(q_list, prev_mq, next_mq)
-    add_vertices(figure, selected_vertices_q, "cyan", "fj-1,mq,fj")
-
-    if angles[2] != 0:
-        figure.add_annotation(go.layout.Annotation(x=medians[1][0] - 0.15, y=medians[1][1] + 0.05,
-                                                   text="β''", arrowcolor="red", ax=-30, ay=10))
-    if angles[3] != 0:
-        figure.add_annotation(go.layout.Annotation(x=medians[1][0] - 0.15, y=medians[1][1] - 0.15,
-                                                   text="β'", arrowcolor="red", ax=-30, ay=20))
+    st.write("α' the angle from eᵢ₋₁ to m and α'' the angle from m to eᵢ")
+    st.write("β' the angle from m to fⱼ and β'' the angle from fⱼ₋₁ to m")
 
     st.image('angles_example.jpg', caption="An example of the angles on two polygons")
-    st.plotly_chart(figure)
-
-    st.write(f"Angle values: α'' = {angles[0]},  α' = {angles[1]},  β'' = {angles[2]},  β' = {angles[3]}")
 
 
 def compute_angles_medians(p_list, q_list):
-    # p1, p2 = p_list[0], p_list[-1]
-    # q1, q2 = q_list[-1], q_list[0]
-
     mp = p_list[len(p_list) // 2]
     mq = q_list[len(q_list) // 2]
 
-    prev_mp, next_mp = get_neighbour_vertices(p_list)
-    prev_mq, next_mq = get_neighbour_vertices(q_list)
+    prev_mp, next_mp = get_neighbour_vertices(p_list, mp)
+    prev_mq, next_mq = get_neighbour_vertices(q_list, mq)
 
     a_up = get_angle(mq, mp, next_mp)
     a_down = get_angle(prev_mp, mp, mq)
@@ -97,25 +66,32 @@ def binary_elimination(p_list, q_list):
     while len(p_list) > 2 or len(q_list) > 2:
         st.subheader(f"Iteration {iteration}:")
         angles, medians = (compute_angles_medians(p_list, q_list))
-        st.write(f"angles:{angles}")
-        p_list, q_list = cases.check_cases1(p_list, q_list, medians, angles)
-        p_list, q_list = cases.check_cases2(p_list, q_list, medians, angles)
-        p_list, q_list = cases.check_cases3(p_list, q_list, medians, angles)
+        st.write(f"Angle values: α'' = {angles[0]},  α' = {angles[1]},  β'' = {angles[2]},  β' = {angles[3]}")
+        p_list, q_list = check_cases(p_list, q_list, medians, angles)
         iteration = iteration + 1
-    st.info("You can now go to the Final Phase page")
+    # st.info("You can now go to the Final Phase page")
     return p_list, q_list
 
 
-def handle_page(p_list, q_list):
+def handle_algorithm_page(p_list, q_list):
     figure = get_main_figure(p_list, q_list)
     show_medians(p_list, q_list, figure)
-    angles, medians = compute_angles_medians(p_list, q_list)
-    show_angles(p_list, q_list, medians, angles)
+    show_angle_example()
 
-    st.write("Based on the number of vertices on the P' and Q' sequences as well as the values of the angles,"
-             "each iteration we have the following cases:")
+    st.write("Based on the number of vertices on the P' and Q' sequences, "
+             "we have the following cases for each iteration:")
     st.write("Case 1: One of the sequences contains only one vertex")
     st.write("Case 2: One of the sequences contains only two vertices")
     st.write("Case 3: Both sequences contain at least three vertices each")
 
     return binary_elimination(p_list, q_list)
+
+
+def binary_elimination_no_display(p_list, q_list):
+    iteration = 1
+    while len(p_list) > 2 or len(q_list) > 2:
+        angles, medians = (compute_angles_medians(p_list, q_list))
+        p_list, q_list = check_cases_no_display(p_list, q_list, medians, angles)
+        iteration = iteration + 1
+
+    return p_list, q_list

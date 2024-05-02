@@ -35,19 +35,6 @@ def update_vertices(new_vertices, polygon_name):
         polygon_q = new_vertices
 
 
-def show_polygon_page():
-    st.title("Initialize Polygons")
-
-    selected_tab = st.radio("Select Polygon", ["Polygon P", "Polygon Q"])
-
-    if selected_tab == "Polygon P":
-        initialize_polygon_tab("P")
-    else:
-        initialize_polygon_tab("Q")
-    st.subheader("Plot visualization")
-    st.plotly_chart(visualise_polygons(), use_container_width=True)
-
-
 def handle_input_file(polygon_name):
     txt_file = st.file_uploader(f"Upload .txt file for Polygon {polygon_name}", type=['txt'])
     if txt_file is not None:
@@ -57,9 +44,9 @@ def handle_input_file(polygon_name):
             return
         file_contents = txt_file.read()
 
-        lines = file_contents.decode().splitlines()
+        file_lines = file_contents.decode().splitlines()
         vertices = []
-        for line in lines:
+        for line in file_lines:
             try:
                 x, y = map(float, line.split(','))
                 vertices.append((x, y))
@@ -125,19 +112,18 @@ def visualise_polygons():
     return figure
 
 
-def initialize_polygon_tab(polygon_name):
+def initialize_polygon_coords_tab(polygon_name):
     handle_input_file(polygon_name)
     vertices = get_polygon_vertices(polygon_name)
     selected_option = st.checkbox(f"Type the coordinates manually for {polygon_name}")
     if selected_option:
         update_vertices([], polygon_name)
         num_vertices = st.number_input(f"How many vertices do you want to enter for {polygon_name}?",
-                                       min_value=3, max_value=20, value=3, step=1)
+                                       min_value=3, max_value=100, value=3, step=1)
         vertices = initialize_vertices(num_vertices, vertices, polygon_name)
         reset = st.button(f"Reset {polygon_name} coordinates")
         if reset:
             update_vertices([], polygon_name)
-            # st.session_state.selected_option = not st.session_state.checkbox_state
 
     st.write("If these are the coordinates you want, press the following button:")
     locked = st.button(f"Lock coordinates for {polygon_name}")

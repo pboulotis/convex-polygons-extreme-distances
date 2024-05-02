@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from shapely.geometry import Point, LineString
+from shapely.geometry import Polygon, Point, LineString
 
 
 def euclidean_distance(a, b):
@@ -36,6 +36,16 @@ def is_convex_polygon(vertices):
         if cross_product(a, b, c) < 0:
             return False
     return True
+
+
+def check_polygon_intersection(polygon_p, polygon_q):
+    polygon_p = Polygon(polygon_p)
+    polygon_q = Polygon(polygon_q)
+    intersection = polygon_p.intersection(polygon_q)
+
+    if intersection.geom_type == 'LineString':
+        return list(intersection.coords)
+    return None
 
 
 def polygon_position(polygon1, polygon2):
@@ -76,33 +86,27 @@ def line_equation(point, vertex, test_point):
 
 
 def find_tangents(polygon, point):
-    tangents = [None, None]
+    lower_tangent = None
+    upper_tangent = None
 
     for vertex in polygon:
-        lower_num = 0
-        upper_num = 0
-        for other_vertex in polygon:
-            if vertex == other_vertex:
-                continue
-            res = line_equation(point, vertex, other_vertex)
-            if res <= 0:
-                lower_num = lower_num + 1
-            else:
-                upper_num = upper_num + 1
+        neighbour_vertices = get_neighbour_vertices(polygon, vertex)
+        res1 = line_equation(point, vertex, neighbour_vertices[0])
+        res2 = line_equation(point, vertex, neighbour_vertices[1])
 
-        if lower_num == len(polygon) - 1:
-            if tangents[0] and tangents[0][1] < vertex[1]:
+        if res1 <= 0 and res2 <= 0:
+            if lower_tangent and lower_tangent[1] < vertex[1]:
                 continue
-            tangents[0] = vertex
-        if upper_num == len(polygon) - 1:
-            if tangents[1] and tangents[0][1] > vertex[1]:
+            lower_tangent = vertex
+        elif res1 >= 0 and res2 >= 0:
+            if upper_tangent and lower_tangent[1] > vertex[1]:
                 continue
-            tangents[1] = vertex
+            upper_tangent = vertex
 
-    if tangents[0][1] > tangents[1][1]:
-        return tangents[1], tangents[0]
+    if lower_tangent[1] > upper_tangent[1]:
+        return upper_tangent, lower_tangent
 
-    return tangents
+    return lower_tangent, upper_tangent
 
 
 def get_selected_vertices(vertices, start, end):
@@ -118,11 +122,11 @@ def get_selected_vertices(vertices, start, end):
     return vertices[start_idx:] + vertices[:end_idx + 1]
 
 
-def get_neighbour_vertices(vertices):
-    index = len(vertices) // 2
-    if index + 1 == len(vertices):
-        return vertices[index - 1], vertices[0]
-    return vertices[index - 1], vertices[index + 1]
+def get_neighbour_vertices(polygon, vertex):
+    index = polygon.index(vertex)
+    if index + 1 == len(polygon):
+        return polygon[index - 1], polygon[0]
+    return polygon[index - 1], polygon[index + 1]
 
 
 def is_angle_negative(a, b, c):
@@ -175,9 +179,9 @@ def get_orthogonal_projection(a, b, c):
         projection_point[0] = c[0]
         projection_point[1] = a[1]
     else:
-        slope1 = calculate_slope(a, b)
-        reverse_slope = - 1 / slope1
-        projection_point[0] = calculate_projection_x(a, c, slope1, reverse_slope)
+        slope = calculate_slope(a, b)
+        reverse_slope = - 1 / slope
+        projection_point[0] = calculate_projection_x(a, c, slope, reverse_slope)
         projection_point[1] = calculate_projection_y(c, reverse_slope, projection_point[0])
     if not is_projection_between_ab_line(a, b, projection_point):
         return False
