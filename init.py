@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
-from polygon_handling import get_polygon_vertices, visualise_polygons, add_point, add_line, add_vertices
+from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_line, draw_vertices, \
+    intersection_exists
 from utils import find_tangents, get_selected_vertices
 
 p_list, q_list = None, None
@@ -31,8 +32,8 @@ def show_u_w(polygon_p, polygon_q):
     if selected_w_vertex != w:
         w = selected_w_vertex
 
-    add_point(figure, u, "green", "u")
-    add_point(figure, w, "red", "w")
+    draw_point(figure, u, "green", "u")
+    draw_point(figure, w, "red", "w")
 
     st.plotly_chart(figure, use_container_width=True)
 
@@ -44,10 +45,10 @@ def show_u_tangents(u, polygon_q):
     w_lower, w_upper = find_tangents(polygon_q, u)
     st.write("We compute the two lines V' and V'' that pass through u and are tangent to Q. "
              "Now w' and w'' are the vertices closest to u where V' and V'' touch Q")
-    add_point(figure, u, "green", "u")
-    add_line(figure, u, w_lower, "green", "V'")
+    draw_point(figure, u, "green", "u")
+    draw_line(figure, u, w_lower, "green", "V'")
     figure.add_annotation(go.layout.Annotation(x=w_lower[0], y=w_lower[1], text="w'"))
-    add_line(figure, u, w_upper, "purple", "V''")
+    draw_line(figure, u, w_upper, "purple", "V''")
 
     figure.add_annotation(go.layout.Annotation(x=w_upper[0], y=w_upper[1], text="w''"))
 
@@ -61,12 +62,12 @@ def show_w_tangents(w, polygon_p, w_lower, w_upper):
     u_lower, u_upper = find_tangents(polygon_p, w)
     st.write("We compute the two lines W' and W'' that pass through w and are tangent to P. "
              "Now u' and u'' are the vertices closest to w where W' and W'' touch P")
-    add_point(figure, w, "red", "w")
+    draw_point(figure, w, "red", "w")
     figure.add_annotation(go.layout.Annotation(x=w_lower[0], y=w_lower[1], text="w'"))
     figure.add_annotation(go.layout.Annotation(x=w_upper[0], y=w_upper[1], text="w''"))
-    add_line(figure, w, u_lower, "green", "W'")
+    draw_line(figure, w, u_lower, "green", "W'")
     figure.add_annotation(go.layout.Annotation(x=u_lower[0], y=u_lower[1], text="u'"))
-    add_line(figure, w, u_upper, "purple", "W''")
+    draw_line(figure, w, u_upper, "purple", "W''")
     figure.add_annotation(go.layout.Annotation(x=u_upper[0], y=u_upper[1], text="u''"))
 
     st.plotly_chart(figure, use_container_width=True)
@@ -82,8 +83,8 @@ def show_p_q_lists(p, q):
     figure.add_annotation(go.layout.Annotation(x=p[-1][0], y=p[-1][1], text="u''"))
     figure.add_annotation(go.layout.Annotation(x=p[0][0], y=p[0][1], text="u'"))
 
-    add_vertices(figure, p, "green", "P'")
-    add_vertices(figure, q, "red", "Q'")
+    draw_vertices(figure, p, "green", "P'")
+    draw_vertices(figure, q, "red", "Q'")
 
     st.plotly_chart(figure, use_container_width=True)
     return figure
@@ -92,6 +93,8 @@ def show_p_q_lists(p, q):
 def show_initial_phase_page():
     global p_list, q_list
     st.subheader("Initial Phase")
+    if intersection_exists():
+        return
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
 
     if not polygon_p or not polygon_q:

@@ -1,15 +1,15 @@
 import streamlit as st
 import plotly.graph_objs as go
 from cases import check_cases, check_cases_no_display
-from polygon_handling import add_point, add_line, add_vertices, visualise_polygons
+from polygon_handling import draw_point, draw_line, draw_vertices, visualise_polygons
 from utils import get_neighbour_vertices, get_angle
 
 
 def get_main_figure(p_list, q_list, annotations=True):
     figure = visualise_polygons()
 
-    add_vertices(figure, p_list, "green", "P'")
-    add_vertices(figure, q_list, "red", "Q'")
+    draw_vertices(figure, p_list, "green", "P'")
+    draw_vertices(figure, q_list, "red", "Q'")
 
     if annotations:
         figure.add_annotation(go.layout.Annotation(x=p_list[0][0], y=p_list[0][1], text="p₁"))
@@ -26,9 +26,9 @@ def show_medians(p_list, q_list, figure):
 
     st.write("We compute the median mₚ in the P' list as well as the median m₍q₎ in the Q' list."
              " Thus drawing the line that connects them, m = s(mₚ,m₍q₎)")
-    add_line(figure, mp, mq, "purple", "m")
-    add_point(figure, mp, "yellow", "mₚ")
-    add_point(figure, mq, "cyan", "m₍q₎")
+    draw_line(figure, mp, mq, "purple", "m")
+    draw_point(figure, mp, "yellow", "mₚ")
+    draw_point(figure, mq, "cyan", "m₍q₎")
     st.plotly_chart(figure)
 
 

@@ -1,11 +1,13 @@
 import streamlit as st
+import plotly.graph_objs as go
+from utils import correct_polygon_position
+from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
+    get_polygon_vertices, intersection_exists, draw_point
+from init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
 from algorithm import handle_algorithm_page, binary_elimination_no_display
 from final import show_min_distance_result
 from max_dist import show_max_dist_page
-from polygon_handling import visualise_polygons, update_vertices, initialize_polygon_coords_tab, get_polygon_vertices
-from init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
 from tester import handle_test
-from utils import check_polygon_intersection
 
 
 def execute_only_algorithm():
@@ -15,8 +17,7 @@ def execute_only_algorithm():
     show_min_distance_result()
 
 
-def handle_min_buttons():
-    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
+def handle_buttons(polygon_p, polygon_q, label):
     if not polygon_p or not polygon_q:
         return
     column1, column2 = st.columns(2)
@@ -24,86 +25,83 @@ def handle_min_buttons():
         button1 = st.empty()
     with column2:
         button2 = st.empty()
-    visual_button = button1.button("Min distance visualization")
-    result_button = button2.button("Min distance result only")
+    visual_button = button1.button(f"{label} distance visualization")
+    result_button = button2.button(f"{label} distance result only")
     if visual_button:
         button1.empty()
         button2.empty()
-        show_initial_phase_page()
-        show_algorithm_page()
-        show_final_phase_page()
-
+        if label == "Minimum":
+            show_initial_phase_page()
+            show_algorithm_page()
+            show_final_phase_page()
+        else:
+            show_max_dist_page()
     if result_button:
         button2.empty()
-        execute_only_algorithm()
-        st.write("You can see all the visualization stages by selecting the pages from the sidebar on the left")
+        if label == "Minimum":
+            execute_only_algorithm()
+            st.write("You can see all the visualization stages by selecting the pages from the sidebar on the left")
+        else:
+            show_max_dist_page(display=False)
 
 
-def handle_max_buttons():
+def handle_intersection_and_buttons():
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
-    if not polygon_p or not polygon_q:
-        return
-    st.write("----------------------------------------------------------")
-    column1, column2 = st.columns(2)
-    with column1:
-        button3 = st.empty()
-    with column2:
-        button4 = st.empty()
-    visual_button = button3.button("Max distance visualization")
-    result_button = button4.button("Max distance result only")
-    if visual_button:
-        button3.empty()
-        button4.empty()
-        show_max_dist_page()
-
-    if result_button:
-        button4.empty()
-        show_max_dist_page(display=False)
-
-
-def show_home_page():
-    st.title("Extreme distances between two convex polygons")
-    example = st.selectbox("Create your own polygons with 'New' or pick an existing example:",
-                           ["Example 1", "Example 2", "Example 3", "New"])
-    polygon_p, polygon_q = [], []
-    if example == "New":
-        update_vertices([], "P")
-        update_vertices([], "Q")
-        show_polygon_page()
-        return
-    elif example == "Example 1":
-        polygon_p = [(0, 0), (0.5, 0), (1, 0.5), (0.5, 1), (0, 1), (-0.5, 0.5)]
-        polygon_q = [(2.25, 1.5), (2.5, 2.5), (1.75, 3), (1, 2.5), (1.25, 1.5)]
-    update_vertices(polygon_p, "P")
-    update_vertices(polygon_q, "Q")
-    st.plotly_chart(visualise_polygons())
-
-    possible_intersection = check_polygon_intersection(polygon_p, polygon_q)
+    possible_intersection = intersection_exists()
     if possible_intersection:
-        st.write(f"The two polygons intersect on the points: {possible_intersection}")
+        figure = visualise_polygons()
+        if isinstance(possible_intersection, tuple):
+            st.write(f"The two polygons intersect on the point: {possible_intersection}")
+            st.write("Therefore the minimum distance is 0, achieved by the intersection point as shown below:")
+            draw_point(figure, possible_intersection, "red", "Intersection point")
+        else:
+            st.write(f"The two polygons intersect on the points: {possible_intersection}")
+            st.write("Therefore the minimum distance is 0, achieved by the intersection points as shown below:")
+            points = go.Scatter(
+                x=[point[0] for point in possible_intersection],
+                y=[point[1] for point in possible_intersection],
+                mode='markers', name='Intersection points', marker=dict(color='red', size=10)
+            )
+            figure.add_trace(points)
+        st.plotly_chart(figure)
+        handle_buttons(polygon_p, polygon_q, "Maximum")
+        return
 
-    handle_min_buttons()
-    handle_max_buttons()
+    handle_buttons(polygon_p, polygon_q, "Minimum")
+    st.write("---")
+    handle_buttons(polygon_p, polygon_q, "Maximum")
 
 
-def show_polygon_page():
+def show_polygon_coordinates_page():
     st.subheader("Initialize Polygons")
+    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
 
     selected_tab = st.radio("Select Polygon", ["Polygon P", "Polygon Q"])
 
     if selected_tab == "Polygon P":
-        initialize_polygon_coords_tab("P")
+        initialise_polygon_coordinates_tab("P")
     else:
-        initialize_polygon_coords_tab("Q")
-    st.write("Plot visualization")
+        initialise_polygon_coordinates_tab("Q")
+
+    if polygon_p and polygon_q and not correct_polygon_position(polygon_p, polygon_q):
+        # swap the polygon coordinates
+        st.info("The polygons where given incorrect positions, switching the coordinates")
+        temp = polygon_p
+        update_vertices(polygon_q, "P")
+        update_vertices(temp, "Q")
+    st.subheader("Plot visualization")
     st.plotly_chart(visualise_polygons(), use_container_width=True)
 
-    handle_min_buttons()
-    handle_max_buttons()
+    if len(polygon_p) < 3 or len(polygon_q) < 3:
+        return
+
+    handle_intersection_and_buttons()
 
 
 def show_algorithm_page():
     st.subheader("Binary Elimination")
+    if intersection_exists():
+        return
 
     p_list, q_list = get_p_q_lists()
     if not p_list or not q_list:
@@ -116,9 +114,12 @@ def show_algorithm_page():
         set_p_q_lists(p_list, q_list)
 
 
-def show_final_phase_page():
+def show_final_phase_page(sidebar=False):
     st.subheader("Final Phase")
-
+    if intersection_exists():
+        return
+    if sidebar:
+        st.warning("If you have not, go to the 'Algorithm' tab first to get the proper results")
     p_list, q_list = get_p_q_lists()
     if not p_list or not q_list:
         st.warning("Go to the 'Algorithm' tab first by selecting it from the sidebar on the left")
@@ -128,6 +129,36 @@ def show_final_phase_page():
 
 def show_tester_page():
     handle_test()
+
+
+def show_home_page():
+    st.title("Extreme distances between two convex polygons")
+    example = st.selectbox("Create your own polygons with 'New' or pick an existing example:",
+                           ["Example 1", "Example 2", "Example 3", "Example 4", "New"])
+    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
+    if example == "New":
+        if polygon_p and polygon_q:
+            update_vertices([], "P")
+            update_vertices([], "Q")
+        show_polygon_coordinates_page()
+        return
+    elif example == "Example 1":
+        polygon_p = [(0, 0), (0.5, 0), (1, 0.5), (0.5, 1), (0, 1), (-0.5, 0.5)]
+        polygon_q = [(2.25, 1.5), (2.5, 2.5), (1.75, 3), (1, 2.5), (1.25, 1.5)]
+    elif example == "Example 2":
+        polygon_p = [(1, 1), (5, 1), (7, 3), (5, 5), (1, 5)]
+        polygon_q = [(7, 1), (10, 1), (10, 5), (7, 5), (6, 3)]
+    elif example == "Example 3":
+        polygon_p = [(1, 1), (5, 1), (6, 3), (5, 5), (1, 5)]
+        polygon_q = [(6, 3), (7, 1), (10, 1), (10, 5), (7, 5)]
+    elif example == "Example 4":
+        polygon_p = [(1, 1), (5, 1), (6, 2), (6, 4), (5, 5), (1, 5)]
+        polygon_q = [(6, 2), (7, 1), (10, 1), (10, 5), (7, 5), (6, 4)]
+    update_vertices(polygon_p, "P")
+    update_vertices(polygon_q, "Q")
+    st.plotly_chart(visualise_polygons())
+
+    handle_intersection_and_buttons()
 
 
 if __name__ == "__main__":
@@ -142,6 +173,6 @@ if __name__ == "__main__":
     elif page == "Tester":
         show_tester_page()
     elif page == "Final Phase":
-        show_final_phase_page()
+        show_final_phase_page(sidebar=True)
     else:
         show_max_dist_page()

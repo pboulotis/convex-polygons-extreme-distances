@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objs as go
-from polygon_handling import add_vertices, visualise_polygons, add_line, add_point
+from polygon_handling import draw_vertices, visualise_polygons, draw_line, draw_point
 from utils import get_selected_vertices, get_orthogonal_projection
 
 
@@ -105,8 +105,8 @@ def handle_case3_2(p_list, q_list, medians, angles):
 def show_figure(p_list, q_list):
     figure = visualise_polygons()
 
-    add_vertices(figure, p_list, "green", "P'")
-    add_vertices(figure, q_list, "red", "Q'")
+    draw_vertices(figure, p_list, "green", "P'")
+    draw_vertices(figure, q_list, "red", "Q'")
 
     if len(p_list) == 1:
         figure.add_annotation(go.layout.Annotation(x=p_list[0][0], y=p_list[0][1], text="p₁ = p₂"))
@@ -123,10 +123,10 @@ def show_figure(p_list, q_list):
     mp = p_list[len(p_list) // 2]
     mq = q_list[len(q_list) // 2]
 
-    add_line(figure, mp, mq, "purple", "m")
-    add_point(figure, mp, "yellow", "mₚ")
+    draw_line(figure, mp, mq, "purple", "m")
+    draw_point(figure, mp, "yellow", "mₚ")
     st.plotly_chart(figure)
-    add_point(figure, mq, "cyan", "m₍q₎")
+    draw_point(figure, mq, "cyan", "m₍q₎")
 
 
 def check_cases(p_list, q_list, medians, angles):

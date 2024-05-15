@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import streamlit
 from shapely.geometry import Polygon, Point, LineString
 
 
@@ -38,43 +39,37 @@ def is_convex_polygon(vertices):
     return True
 
 
-def check_polygon_intersection(polygon_p, polygon_q):
-    polygon_p = Polygon(polygon_p)
-    polygon_q = Polygon(polygon_q)
+def check_polygon_intersection(polygon_p_list, polygon_q_list):
+    polygon_p = Polygon(polygon_p_list)
+    polygon_q = Polygon(polygon_q_list)
     intersection = polygon_p.intersection(polygon_q)
+    if not intersection:
+        return None
+    if intersection.geom_type == 'Point':
+        # A single intersection point
+        return round(intersection.x, 2), round(intersection.y, 2)
+    elif intersection.geom_type == 'LineString':
+        # Points in the same line
+        return [(round(x, 2), round(y, 2)) for x, y in list(intersection.coords)]
 
-    if intersection.geom_type == 'LineString':
-        return list(intersection.coords)
-    return None
+    all_intersection_points = list(intersection.exterior.coords)
+    intersection_points = []
 
-
-def polygon_position(polygon1, polygon2):
-    mean1 = np.mean(polygon1, axis=0)
-    mean2 = np.mean(polygon2, axis=0)
-
-    if mean2[0] > mean1[0]:
-        return 'left', 'right'
-    return 'right', 'left'
-
-
-def closest_vertex(vertices, point):
-    temp_distance = euclidean_distance(vertices[0], point)
-    closest = vertices[0]
-    for i in range(1, len(vertices)):
-        if euclidean_distance(vertices[i], point) < temp_distance:
-            closest = vertices[i]
-            temp_distance = euclidean_distance(vertices[i], point)
-
-    return closest
+    for vertex in all_intersection_points:
+        if vertex in polygon_p_list and vertex in polygon_q_list:
+            intersection_points.append([round(vertex[0], 2), round(vertex[1], 2)])
+        elif vertex not in polygon_p_list and vertex not in polygon_q_list:
+            intersection_points.append([round(vertex[0], 2), round(vertex[1], 2)])
+    return intersection_points
 
 
-def get_polygon_edges(polygon):
-    edges = []
-    for i in range(len(polygon)):
-        p1 = polygon[i]
-        p2 = polygon[(i + 1) % len(polygon)]
-        edges.append(LineString([Point(p1), Point(p2)]))
-    return edges
+def correct_polygon_position(polygon_p, polygon_q):
+    mean1 = np.mean(polygon_p, axis=0)
+    mean2 = np.mean(polygon_q, axis=0)
+
+    if mean2[0] < mean1[0]:
+        return False
+    return True
 
 
 def line_equation(point, vertex, test_point):
