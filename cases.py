@@ -124,9 +124,9 @@ def show_figure(p_list, q_list):
     mq = q_list[len(q_list) // 2]
 
     draw_line(figure, mp, mq, "purple", "m")
-    draw_point(figure, mp, "yellow", "mₚ")
+    draw_point(figure, mp, "blue", "mₚ")
     st.plotly_chart(figure)
-    draw_point(figure, mq, "cyan", "m₍q₎")
+    draw_point(figure, mq, "yellow", "m₍q₎")
 
 
 def check_cases(p_list, q_list, medians, angles):

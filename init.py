@@ -17,11 +17,9 @@ def set_p_q_lists(p, q):
     p_list, q_list = p, q
 
 
-def show_u_w(polygon_p, polygon_q):
+def change_u_w(polygon_p, polygon_q):
     u = None
     w = None
-    figure = visualise_polygons()
-    st.write("We choose u and w, as arbitrary points in P and Q, respectively")
     selected_u_vertex = st.selectbox("Select an u vertex from P polygon", polygon_p,
                                      format_func=lambda vertex: f"({vertex[0]}, {vertex[1]})")
     if selected_u_vertex != u:
@@ -32,12 +30,14 @@ def show_u_w(polygon_p, polygon_q):
     if selected_w_vertex != w:
         w = selected_w_vertex
 
+    return u, w
+
+
+def show_u_w_points(u, w):
+    figure = visualise_polygons()
     draw_point(figure, u, "green", "u")
     draw_point(figure, w, "red", "w")
-
     st.plotly_chart(figure, use_container_width=True)
-
-    return u, w
 
 
 def show_u_tangents(u, polygon_q):
@@ -90,7 +90,7 @@ def show_p_q_lists(p, q):
     return figure
 
 
-def show_initial_phase_page():
+def show_initial_phase_page(sidebar=False):
     global p_list, q_list
     st.subheader("Initial Phase")
     if intersection_exists():
@@ -100,14 +100,20 @@ def show_initial_phase_page():
     if not polygon_p or not polygon_q:
         st.warning("Please fill the vertices first using the 'Polygon coordinates' tab or by selecting an example on "
                    "the 'Home' tab")
-    else:
-        u, w = show_u_w(polygon_p, polygon_q)
-        w_lower, w_upper = show_u_tangents(u, polygon_q)
-        u_lower, u_upper = show_w_tangents(w, polygon_p, w_lower, w_upper)
-        p_list = get_selected_vertices(polygon_p, u_lower, u_upper)
-        q_list = get_selected_vertices(polygon_q, w_upper, w_lower)
-        st.write("We choose the sequences from u' to u'' as P' and from w'' to w' as Q'")
-        show_p_q_lists(p_list, q_list)
+        return
+
+    st.write("We choose u and w, as arbitrary vertices in P and Q, respectively")
+    u, w = polygon_p[0], polygon_q[0]
+    if sidebar:
+        st.write("You will get the correct result for any vertices selected")
+        u, w = change_u_w(polygon_p, polygon_q)
+    show_u_w_points(u, w)
+    w_lower, w_upper = show_u_tangents(u, polygon_q)
+    u_lower, u_upper = show_w_tangents(w, polygon_p, w_lower, w_upper)
+    p_list = get_selected_vertices(polygon_p, u_lower, u_upper)
+    q_list = get_selected_vertices(polygon_q, w_upper, w_lower)
+    st.write("We choose the sequences from u' to u'' as P' and from w'' to w' as Q'")
+    show_p_q_lists(p_list, q_list)
 
 
 def get_initial_phase_result_no_display():

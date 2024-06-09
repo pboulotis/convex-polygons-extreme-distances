@@ -34,8 +34,6 @@ def update_vertices(new_vertices, polygon_name):
     else:
         polygon_q = convert_counterclockwise(new_vertices)
 
-    # print(f"Updated {polygon_name} vertices: {polygon_p if polygon_name == 'P' else polygon_q}")
-
 
 def intersection_exists():
     possible_intersection = check_polygon_intersection(polygon_p, polygon_q)
@@ -63,20 +61,21 @@ def handle_input_file(vertices, polygon_name):
         except ValueError:
             st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line...")
     if vertices:
+        vertices = convert_counterclockwise(vertices)
         update_vertices(vertices, polygon_name)
 
 
 def initialise_vertices_manually(num_vertices, vertices, polygon_name):
     if not vertices:
         vertices = []
-    st.subheader(f"Type the (x,y) coordinates of the {num_vertices} vertices of the polygon:")
+    st.subheader(f"Type the (x,y) coordinates of the {num_vertices} vertices of the polygon {polygon_name}:")
 
     for i in range(num_vertices):
         x, y = VertexInput(f"{i + 1}").write()
         if x is not None and y is not None:
             vertices.append((x, y))
 
-    update_vertices(vertices, polygon_name)
+    # update_vertices(vertices, polygon_name)
 
     return vertices
 
@@ -90,19 +89,25 @@ def initialise_polygon_coordinates_tab(polygon_name):
         vertices = []
         num_vertices = st.number_input(f"How many vertices do you want to enter for {polygon_name}?",
                                        min_value=3, max_value=100, value=3, step=1)
-
         vertices = initialise_vertices_manually(num_vertices, vertices, polygon_name)
+
         reset = st.button(f"Reset {polygon_name} coordinates")
         if reset:
+            vertices = []
             update_vertices([], polygon_name)
+
+        if len(vertices) > 0 and is_convex_polygon(vertices):
+            st.write("The polygon (so far):")
+            figure = go.Figure()
+            figure.update_xaxes(scaleanchor="y", scaleratio=1)
+            draw_polygon(figure, vertices, "grey", f"{polygon_name}")
+            st.plotly_chart(figure)
 
     st.write("If these are the coordinates you want, press the following button:")
     locked = st.button(f"Lock coordinates for {polygon_name}")
     if locked:
         vertices = convert_counterclockwise(vertices)
-
-    # update_vertices(vertices, polygon_name)
-    return vertices
+        update_vertices(vertices, polygon_name)
 
 
 def draw_point(figure, point, color, name):
@@ -122,27 +127,26 @@ def draw_vertices(figure, vertices, color, name):
                                     marker=dict(size=10), line=dict(color=f'{color}'), name=f"{name}"))
 
 
+def draw_polygon(figure, polygon, color, name):
+    x, y = zip(*polygon)
+    figure.add_trace(go.Scatter(x=list(x) + [x[0]], y=list(y) + [y[0]], mode='lines+markers',
+                                marker=dict(size=10), line=dict(color=f'{color}'), name=f"Polygon {name}"))
+
+
 def visualise_polygons():
     global polygon_p, polygon_q
     figure = go.Figure()
-    figure.update_xaxes(
-        scaleanchor="y",
-        scaleratio=1,
-    )
+    figure.update_xaxes(scaleanchor="y", scaleratio=1)
     # figure.update_layout(width=650, height=650)
 
     if len(polygon_p) > 0 and is_convex_polygon(polygon_p):
-        x1, y1 = zip(*polygon_p)
-        figure.add_trace(go.Scatter(x=list(x1) + [x1[0]], y=list(y1) + [y1[0]], mode='lines+markers',
-                                    marker=dict(size=10), line=dict(color='blue'), name="Polygon P"))
+        draw_polygon(figure, polygon_p, "cyan", "P")
     else:
         draw_vertices(figure, polygon_p, "cyan", "Polygon P")
 
     if len(polygon_q) > 0 and is_convex_polygon(polygon_q):
-        x2, y2 = zip(*polygon_q)
-        figure.add_trace(go.Scatter(x=list(x2) + [x2[0]], y=list(y2) + [y2[0]], mode='lines+markers',
-                                    marker=dict(size=10), line=dict(color='orange'), name="Polygon Q"))
+        draw_polygon(figure, polygon_q, "orange", "Q")
     else:
-        draw_vertices(figure, polygon_q, "orange", "polygon Q")
+        draw_vertices(figure, polygon_q, "orange", "Polygon Q")
 
     return figure

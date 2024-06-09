@@ -27,8 +27,8 @@ def show_medians(p_list, q_list, figure):
     st.write("We compute the median mₚ in the P' list as well as the median m₍q₎ in the Q' list."
              " Thus drawing the line that connects them, m = s(mₚ,m₍q₎)")
     draw_line(figure, mp, mq, "purple", "m")
-    draw_point(figure, mp, "yellow", "mₚ")
-    draw_point(figure, mq, "cyan", "m₍q₎")
+    draw_point(figure, mp, "blue", "mₚ")
+    draw_point(figure, mq, "yellow", "m₍q₎")
     st.plotly_chart(figure)
 
 

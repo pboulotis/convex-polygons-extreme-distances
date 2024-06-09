@@ -52,9 +52,9 @@ def check_polygon_intersection(polygon_p_list, polygon_q_list):
         # Points in the same line
         return [(round(x, 2), round(y, 2)) for x, y in list(intersection.coords)]
 
+    # Multiple intersection points
     all_intersection_points = list(intersection.exterior.coords)
     intersection_points = []
-
     for vertex in all_intersection_points:
         if vertex in polygon_p_list and vertex in polygon_q_list:
             intersection_points.append([round(vertex[0], 2), round(vertex[1], 2)])
@@ -94,9 +94,12 @@ def find_tangents(polygon, point):
                 continue
             lower_tangent = vertex
         elif res1 >= 0 and res2 >= 0:
-            if upper_tangent and lower_tangent[1] > vertex[1]:
+            if upper_tangent and upper_tangent[1] > vertex[1]:
                 continue
             upper_tangent = vertex
+
+    if not lower_tangent or not upper_tangent:
+        return polygon[0], polygon[-1]
 
     if lower_tangent[1] > upper_tangent[1]:
         return upper_tangent, lower_tangent

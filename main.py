@@ -84,12 +84,12 @@ def show_polygon_coordinates_page():
         initialise_polygon_coordinates_tab("Q")
 
     if polygon_p and polygon_q and not correct_polygon_position(polygon_p, polygon_q):
-        # swap the polygon coordinates
+        # Swap the polygon coordinates
         st.info("The polygons where given incorrect positions, switching the coordinates")
         temp = polygon_p
         update_vertices(polygon_q, "P")
         update_vertices(temp, "Q")
-    st.subheader("Plot visualization")
+    st.subheader("Visualization of both polygons")
     st.plotly_chart(visualise_polygons(), use_container_width=True)
 
     if len(polygon_p) < 3 or len(polygon_q) < 3:
@@ -119,10 +119,10 @@ def show_final_phase_page(sidebar=False):
     if intersection_exists():
         return
     if sidebar:
-        st.warning("If you have not, go to the 'Algorithm' tab first to get the proper results")
+        st.warning("If you have not, go to the 'Binary Elimination' tab first to get the proper results")
     p_list, q_list = get_p_q_lists()
     if not p_list or not q_list:
-        st.warning("Go to the 'Algorithm' tab first by selecting it from the sidebar on the left")
+        st.warning("Go to the 'Binary Elimination' tab first by selecting it from the sidebar on the left")
     else:
         show_min_distance_result(show_all_possibilities=True)
 
@@ -134,7 +134,7 @@ def show_tester_page():
 def show_home_page():
     st.title("Extreme distances between two convex polygons")
     example = st.selectbox("Create your own polygons with 'New' or pick an existing example:",
-                           ["Example 1", "Example 2", "Example 3", "Example 4", "New"])
+                           ["Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "New"])
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     if example == "New":
         if polygon_p and polygon_q:
@@ -147,13 +147,16 @@ def show_home_page():
         polygon_q = [(2.25, 1.5), (2.5, 2.5), (1.75, 3), (1, 2.5), (1.25, 1.5)]
     elif example == "Example 2":
         polygon_p = [(1, 1), (5, 1), (7, 3), (5, 5), (1, 5)]
-        polygon_q = [(7, 1), (10, 1), (10, 5), (7, 5), (6, 3)]
+        polygon_q = [(6, 3), (7, 1), (10, 1), (10, 5), (7, 5)]
     elif example == "Example 3":
         polygon_p = [(1, 1), (5, 1), (6, 3), (5, 5), (1, 5)]
         polygon_q = [(6, 3), (7, 1), (10, 1), (10, 5), (7, 5)]
     elif example == "Example 4":
         polygon_p = [(1, 1), (5, 1), (6, 2), (6, 4), (5, 5), (1, 5)]
         polygon_q = [(6, 2), (7, 1), (10, 1), (10, 5), (7, 5), (6, 4)]
+    elif example == "Example 5":
+        polygon_p = [(0, 0), (2, 0), (3, 1), (3, 2), (2, 3), (0, 3), (-1, 2), (-1, 1)]
+        polygon_q = [(1, 1.5), (1.5, 1.5), (1.75, 1.75), (1.5, 2), (1, 2)]
     update_vertices(polygon_p, "P")
     update_vertices(polygon_q, "Q")
     st.plotly_chart(visualise_polygons())
@@ -163,12 +166,12 @@ def show_home_page():
 
 if __name__ == "__main__":
     page = st.sidebar.selectbox("Select Page", ["Home", "Initial Phase",
-                                                "Algorithm", "Final Phase", "Tester", "Maximum Distance"])
+                                                "Binary Elimination", "Final Phase", "Tester", "Maximum Distance"])
     if page == "Home":
         show_home_page()
     elif page == "Initial Phase":
-        show_initial_phase_page()
-    elif page == "Algorithm":
+        show_initial_phase_page(sidebar=True)
+    elif page == "Binary Elimination":
         show_algorithm_page()
     elif page == "Tester":
         show_tester_page()

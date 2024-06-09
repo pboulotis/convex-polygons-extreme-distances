@@ -7,7 +7,7 @@ from utils import calculate_triangle_area as area, euclidean_distance
 
 def show_points(i, j):
     figure = visualise_polygons()
-    draw_point(figure, i, "cyan", "i")
+    draw_point(figure, i, "blue", "i")
     draw_point(figure, j, "red", "j")
     st.plotly_chart(figure)
 
@@ -33,38 +33,36 @@ def next_index(index, polygon):
 
 def get_antipodal_pairs(p, q):
     pair_list = []
-    i = -1
-    i0 = len(p) - 1
+    i = 0
     j = len(q) - 1
+    furthest = 0
 
-    # st.write(area(p[i], p[next_index(i, p)], q[next_index(j, q)]), area(p[i], p[next_index(i, p)], q[j]))
-    while area(p[-1], p[0], q[next_index(j, q)]) > area(p[-1], p[0], q[j]):
+    # Find the furthest vertex from the starting vertex (i)
+    iteration = 0
+    while iteration != len(q) - 1:
+        if area(p[i], p[next_index(i, p)], q[next_index(j, q)]) > area(p[i], p[next_index(i, p)], q[j]):
+            furthest = next_index(j, q)
         j = next_index(j, q)
-    j0 = j
+        iteration = iteration + 1
 
-    while j != 0:
+    j = furthest
+
+    while i < len(p) - 1:
         i = next_index(i, p)
         add_pair([p[i], q[j]], pair_list)
-        # st.write(f"i: {i} and j: {j}, i0: {i0}")
-        # show_points(p[i], q[j])
-        # st.write(area(p[i], p[next_index(i, p)], q[next_index(j, q)]), area(p[i], p[next_index(i, p)], q[j]))
 
         while area(p[i], p[next_index(i, p)], q[next_index(j, q)]) > area(p[i], p[next_index(i, p)], q[j]):
             j = next_index(j, q)
-            # st.write(f"New j: {j}")
 
-            # if (i, j) != (j0, i0):
             add_pair([p[i], q[j]], pair_list)
 
         if area(p[i], p[next_index(i, p)], q[next_index(j, q)]) == area(p[i], p[next_index(i, p)], q[j]):
-            # if (i, j) != (j0, i0):
 
             add_pair([p[i], q[j]], pair_list)
-            # st.write(f"New j: {j}")
 
-        if i == i0 and j == j0:
-            # st.subheader(f"HERE j = {j}")
+        if i == 0 and j == furthest:
             j = next_index(j, q)
+
     return pair_list
 
 
@@ -120,13 +118,12 @@ def display_pairs(pair_list, label1, label2):
     for pair in range(len(pair_list)):
         st.write(f"{pair + 1})")
         figure = visualise_polygons()
-        draw_point(figure, pair_list[pair][0], "cyan", f"Polygon {label1} vertex")
+        draw_point(figure, pair_list[pair][0], "blue", f"Polygon {label1} vertex")
         draw_point(figure, pair_list[pair][1], "red", f"Polygon {label2} vertex")
         st.plotly_chart(figure)
 
 
 def show_max_distance_result(pairs):
-    st.subheader("Maximum distance between the two convex polygons")
     vertex_pair, max_distance = find_max_distance(pairs)
     st.write(f"The maximum distance is {np.round(max_distance, 2)} by the points"
              f" {vertex_pair[0]} and {vertex_pair[1]}")
@@ -136,6 +133,7 @@ def show_max_distance_result(pairs):
 
 
 def show_max_dist_page(display=True):
+    st.subheader("Maximum distance between the two convex polygons")
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     if not polygon_p or not polygon_q:
         st.warning("Please fill the polygon vertices first")
