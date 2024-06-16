@@ -65,7 +65,7 @@ def show_min_distance_result(show_all_possibilities=False):
 
     st.subheader("Minimum distance between the two convex polygons")
     figure = visualise_polygons()
-    draw_vertices(figure, [final_points[0], final_points[1]], "red", "minimum_distance", )
+    draw_vertices(figure, [final_points[0], final_points[1]], "red", "minimum distance")
     st.write(f"The minimum distance is {np.round(distance, 2)}"
              f" realised by the points {final_points[0]} and {final_points[1]}")
     st.plotly_chart(figure)

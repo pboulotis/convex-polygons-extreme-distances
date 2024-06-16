@@ -1,15 +1,7 @@
 import streamlit as st
 import numpy as np
-# import plotly.graph_objs as go
 from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_vertices
 from utils import calculate_triangle_area as area, euclidean_distance
-
-
-def show_points(i, j):
-    figure = visualise_polygons()
-    draw_point(figure, i, "blue", "i")
-    draw_point(figure, j, "red", "j")
-    st.plotly_chart(figure)
 
 
 def add_pair2(pair, pair_list, max_distance):
@@ -66,33 +58,6 @@ def get_antipodal_pairs(p, q):
     return pair_list
 
 
-def get_antipodal_pairs_single(polygon):
-    pair_list = []
-    pn = len(polygon) - 1
-    p = pn
-    q = next_index(p, polygon)
-    while (area(polygon[p], polygon[next_index(p, polygon)], polygon[next_index(q, polygon)]) >
-           area(polygon[p], polygon[next_index(p, polygon)], polygon[q])):
-        q = next_index(q, polygon)
-    q0 = q
-    while q != 0:
-        p = next_index(p, polygon)
-        add_pair([p, q], pair_list)
-
-        while (area(polygon[p], polygon[next_index(p, polygon)], polygon[next_index(q, polygon)]) >
-               area(polygon[p], polygon[next_index(p, polygon)], polygon[q])):
-            q = next_index(q, polygon)
-            if (p, q) != (q0, 0):
-                add_pair([p, q], pair_list)
-
-        if (area(polygon[p], polygon[next_index(p, polygon)], polygon[next_index(q, polygon)]) ==
-                area(polygon[p], polygon[next_index(p, polygon)], polygon[q])):
-            if (p, q) != (q0, pn):
-                add_pair([p, q], pair_list)
-
-    return pair_list
-
-
 def find_max_distance(pair_list):
     max_distance = 0
     vertex_pair = None
@@ -105,6 +70,7 @@ def find_max_distance(pair_list):
     return vertex_pair, max_distance
 
 
+#  TODO remove in final version
 def get_all_pairs(polygon, other_polygon):
     pair_list = []
     for vertex in polygon:

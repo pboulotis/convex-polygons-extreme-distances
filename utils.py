@@ -1,14 +1,13 @@
 import math
 import numpy as np
-import streamlit
-from shapely.geometry import Polygon, Point, LineString
+from shapely.geometry import Polygon
 
 
 def euclidean_distance(a, b):
     return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
 
-#  If this is >0 then a,b,c are counterclockwise
+#  If this is >0 then a,b,c are assigned counterclockwise
 def calculate_triangle_area(a, b, c):
     return 0.5 * (a[0] * b[1] - a[1] * b[0] + a[1] * c[0] - a[0] * c[1] + b[0] * c[1] - b[1] * c[0])
 
@@ -29,12 +28,8 @@ def cross_product(a, b, c):
 def is_convex_polygon(vertices):
     if not vertices:
         return True
-    for i in range(len(vertices)):
-        a = vertices[i]
-        b = vertices[(i + 1) % len(vertices)]
-        c = vertices[(i + 2) % len(vertices)]
-
-        if cross_product(a, b, c) < 0:
+    for i in range(len(vertices) - 2):
+        if cross_product(vertices[i], vertices[i + 1], vertices[i + 2]) < 0:
             return False
     return True
 
@@ -72,6 +67,13 @@ def correct_polygon_position(polygon_p, polygon_q):
     return True
 
 
+def get_neighbour_vertices(polygon, vertex):
+    index = polygon.index(vertex)
+    if index + 1 == len(polygon):
+        return polygon[index - 1], polygon[0]
+    return polygon[index - 1], polygon[index + 1]
+
+
 def line_equation(point, vertex, test_point):
     px, py = point
     qx, qy = vertex
@@ -99,32 +101,13 @@ def find_tangents(polygon, point):
             upper_tangent = vertex
 
     if not lower_tangent or not upper_tangent:
-        return polygon[0], polygon[-1]
+        # The polygon is inside the other polygon
+        return None, None
 
     if lower_tangent[1] > upper_tangent[1]:
         return upper_tangent, lower_tangent
 
     return lower_tangent, upper_tangent
-
-
-def get_selected_vertices(vertices, start, end):
-    start_idx = vertices.index(start)
-    end_idx = vertices.index(end)
-
-    if start == end:
-        return [start]
-
-    if start_idx < end_idx:
-        return vertices[start_idx:end_idx + 1]
-
-    return vertices[start_idx:] + vertices[:end_idx + 1]
-
-
-def get_neighbour_vertices(polygon, vertex):
-    index = polygon.index(vertex)
-    if index + 1 == len(polygon):
-        return polygon[index - 1], polygon[0]
-    return polygon[index - 1], polygon[index + 1]
 
 
 def is_angle_negative(a, b, c):

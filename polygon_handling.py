@@ -35,6 +35,19 @@ def update_vertices(new_vertices, polygon_name):
         polygon_q = convert_counterclockwise(new_vertices)
 
 
+def get_selected_vertices(vertices, start, end):
+    start_idx = vertices.index(start)
+    end_idx = vertices.index(end)
+
+    if start == end:
+        return [start]
+
+    if start_idx < end_idx:
+        return vertices[start_idx:end_idx + 1]
+
+    return vertices[start_idx:] + vertices[:end_idx + 1]
+
+
 def intersection_exists():
     possible_intersection = check_polygon_intersection(polygon_p, polygon_q)
     if possible_intersection:
@@ -74,8 +87,6 @@ def initialise_vertices_manually(num_vertices, vertices, polygon_name):
         x, y = VertexInput(f"{i + 1}").write()
         if x is not None and y is not None:
             vertices.append((x, y))
-
-    # update_vertices(vertices, polygon_name)
 
     return vertices
 
@@ -137,7 +148,6 @@ def visualise_polygons():
     global polygon_p, polygon_q
     figure = go.Figure()
     figure.update_xaxes(scaleanchor="y", scaleratio=1)
-    # figure.update_layout(width=650, height=650)
 
     if len(polygon_p) > 0 and is_convex_polygon(polygon_p):
         draw_polygon(figure, polygon_p, "cyan", "P")

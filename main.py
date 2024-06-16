@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly.graph_objs as go
-from utils import correct_polygon_position
+from utils import correct_polygon_position, find_tangents
 from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
-    get_polygon_vertices, intersection_exists, draw_point
+    get_polygon_vertices, intersection_exists, draw_point, draw_polygon
 from init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
 from algorithm import handle_algorithm_page, binary_elimination_no_display
 from final import show_min_distance_result
@@ -45,6 +45,30 @@ def handle_buttons(polygon_p, polygon_q, label):
             show_max_dist_page(display=False)
 
 
+def internal_polygon_exists(polygon_p, polygon_q):
+    w_lower, w_upper = find_tangents(polygon_q, polygon_p[0])
+    u_lower, u_upper = find_tangents(polygon_p, polygon_q[0])
+    figure = go.Figure()
+    figure.update_xaxes(scaleanchor="y", scaleratio=1)
+
+    if w_lower is None or w_upper is None:
+        st.info("The polygon P is inside the polygon Q")
+        st.write("Therefore the minimum distance is 0, achieved by all points of the interior polygon")
+        draw_polygon(figure, polygon_q, "orange", "Q")
+        draw_polygon(figure, polygon_p, "red", "P is interior polygon")
+        st.plotly_chart(figure)
+        return True
+    elif u_lower is None or u_upper is None:
+        st.info("The polygon Q is inside the polygon P")
+        st.write("Therefore the minimum distance is 0, achieved by all points of the interior polygon")
+        draw_polygon(figure, polygon_p, "cyan", "P")
+        draw_polygon(figure, polygon_q, "red", "Q interior")
+
+        st.plotly_chart(figure)
+        return True
+    return False
+
+
 def handle_intersection_and_buttons():
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     possible_intersection = intersection_exists()
@@ -66,8 +90,8 @@ def handle_intersection_and_buttons():
         st.plotly_chart(figure)
         handle_buttons(polygon_p, polygon_q, "Maximum")
         return
-
-    handle_buttons(polygon_p, polygon_q, "Minimum")
+    if not internal_polygon_exists(polygon_p, polygon_q):
+        handle_buttons(polygon_p, polygon_q, "Minimum")
     st.write("---")
     handle_buttons(polygon_p, polygon_q, "Maximum")
 
@@ -76,7 +100,7 @@ def show_polygon_coordinates_page():
     st.subheader("Initialize Polygons")
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
 
-    selected_tab = st.radio("Select Polygon", ["Polygon P", "Polygon Q"])
+    selected_tab = st.radio("Select Polygon, Polygon P (left) and Polygon Q (right)", ["Polygon P", "Polygon Q"])
 
     if selected_tab == "Polygon P":
         initialise_polygon_coordinates_tab("P")
@@ -156,7 +180,7 @@ def show_home_page():
         polygon_q = [(6, 2), (7, 1), (10, 1), (10, 5), (7, 5), (6, 4)]
     elif example == "Example 5":
         polygon_p = [(0, 0), (2, 0), (3, 1), (3, 2), (2, 3), (0, 3), (-1, 2), (-1, 1)]
-        polygon_q = [(1, 1.5), (1.5, 1.5), (1.75, 1.75), (1.5, 2), (1, 2)]
+        polygon_q = [(0.5, 1), (1.5, 1), (1.75, 1.5), (1.5, 2), (0.5, 2)]
     update_vertices(polygon_p, "P")
     update_vertices(polygon_q, "Q")
     st.plotly_chart(visualise_polygons())

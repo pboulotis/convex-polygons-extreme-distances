@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objs as go
 from cases import check_cases, check_cases_no_display
 from polygon_handling import draw_point, draw_line, draw_vertices, visualise_polygons
-from utils import get_neighbour_vertices, get_angle
+from utils import get_angle, get_neighbour_vertices
 
 
 def get_main_figure(p_list, q_list, annotations=True):

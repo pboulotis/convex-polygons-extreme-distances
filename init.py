@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly.graph_objs as go
 from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_line, draw_vertices, \
-    intersection_exists
-from utils import find_tangents, get_selected_vertices
+    intersection_exists, get_selected_vertices
+from utils import find_tangents
 
 p_list, q_list = None, None
 
