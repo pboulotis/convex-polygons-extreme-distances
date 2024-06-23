@@ -7,7 +7,6 @@ from init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_init
 from algorithm import handle_algorithm_page, binary_elimination_no_display
 from final import show_min_distance_result
 from max_dist import show_max_dist_page
-from tester import handle_test
 
 
 def execute_only_algorithm():
@@ -190,15 +189,15 @@ def show_home_page():
 
 if __name__ == "__main__":
     page = st.sidebar.selectbox("Select Page", ["Home", "Initial Phase",
-                                                "Binary Elimination", "Final Phase", "Tester", "Maximum Distance"])
+                                                "Binary Elimination", "Final Phase", "Maximum Distance"])
     if page == "Home":
         show_home_page()
     elif page == "Initial Phase":
         show_initial_phase_page(sidebar=True)
     elif page == "Binary Elimination":
         show_algorithm_page()
-    elif page == "Tester":
-        show_tester_page()
+    # elif page == "Tester":
+    #     show_tester_page()
     elif page == "Final Phase":
         show_final_phase_page(sidebar=True)
     else:
