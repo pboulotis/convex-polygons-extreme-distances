@@ -1,13 +1,12 @@
 import streamlit as st
 import plotly.graph_objs as go
-from utils import correct_polygon_position, find_tangents
+from geometry_utils import correct_polygon_position, find_tangents
 from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
     get_polygon_vertices, intersection_exists, draw_point, draw_polygon
-from init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
+from algorithm_init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
 from algorithm import handle_algorithm_page, binary_elimination_no_display
-from final import show_min_distance_result
-from max_dist import show_max_dist_page
-from tester import handle_test
+from algorithm_final import show_min_distance_result
+from max_distance import show_max_distance_page
 
 
 def execute_only_algorithm():
@@ -35,14 +34,14 @@ def handle_buttons(polygon_p, polygon_q, label):
             show_algorithm_page()
             show_final_phase_page()
         else:
-            show_max_dist_page()
+            show_max_distance_page()
     if result_button:
         button2.empty()
         if label == "Minimum":
             execute_only_algorithm()
             st.write("You can see all the visualization stages by selecting the pages from the sidebar on the left")
         else:
-            show_max_dist_page(display=False)
+            show_max_distance_page(display=False)
 
 
 def internal_polygon_exists(polygon_p, polygon_q):
@@ -151,10 +150,6 @@ def show_final_phase_page(sidebar=False):
         show_min_distance_result(show_all_possibilities=True)
 
 
-def show_tester_page():
-    handle_test()
-
-
 def show_home_page():
     st.title("Extreme distances between two convex polygons")
     example = st.selectbox("Create your own polygons with 'New' or pick an existing example:",
@@ -190,16 +185,14 @@ def show_home_page():
 
 if __name__ == "__main__":
     page = st.sidebar.selectbox("Select Page", ["Home", "Initial Phase",
-                                                "Binary Elimination", "Final Phase", "Tester", "Maximum Distance"])
+                                                "Binary Elimination", "Final Phase", "Maximum Distance"])
     if page == "Home":
         show_home_page()
     elif page == "Initial Phase":
         show_initial_phase_page(sidebar=True)
     elif page == "Binary Elimination":
         show_algorithm_page()
-    elif page == "Tester":
-        show_tester_page()
     elif page == "Final Phase":
         show_final_phase_page(sidebar=True)
     else:
-        show_max_dist_page()
+        show_max_distance_page()

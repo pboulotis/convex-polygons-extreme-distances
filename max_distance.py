@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_vertices
-from utils import calculate_triangle_area as area, euclidean_distance
+from geometry_utils import calculate_triangle_area as area, euclidean_distance
 
 
 def add_pair2(pair, pair_list, max_distance):
@@ -98,7 +98,7 @@ def show_max_distance_result(pairs):
     st.plotly_chart(figure)
 
 
-def show_max_dist_page(display=True):
+def show_max_distance_page(display=True):
     st.subheader("Maximum distance between the two convex polygons")
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     if not polygon_p or not polygon_q:

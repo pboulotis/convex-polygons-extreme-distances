@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 
-from utils import is_convex_polygon, convert_counterclockwise, check_polygon_intersection
+from geometry_utils import is_convex_polygon, convert_counterclockwise, check_polygon_intersection
 
 polygon_p, polygon_q = [], []
 

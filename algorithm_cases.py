@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 from polygon_handling import draw_vertices, visualise_polygons, draw_line, draw_point, get_selected_vertices
-from utils import get_orthogonal_projection
+from geometry_utils import get_orthogonal_projection
 
 
 def handle_case1_p(q_list, mq, angles):

@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objs as go
 from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_line, draw_vertices, \
     intersection_exists, get_selected_vertices
-from utils import find_tangents
+from geometry_utils import find_tangents
 
 p_list, q_list = None, None
 
@@ -120,7 +120,7 @@ def get_initial_phase_result_no_display():
     global p_list, q_list
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     u = polygon_p[0]
-    w = polygon_q[-1]
+    w = polygon_q[0]
     w_lower, w_upper = find_tangents(polygon_q, u)
     u_lower, u_upper = find_tangents(polygon_p, w)
     p_list = get_selected_vertices(polygon_p, u_lower, u_upper)

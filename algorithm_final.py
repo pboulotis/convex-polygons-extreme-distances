@@ -1,9 +1,9 @@
 import streamlit as st
 import numpy as np
 import plotly.graph_objs as go
-from init import get_p_q_lists
+from algorithm_init import get_p_q_lists
 from polygon_handling import visualise_polygons, draw_vertices
-from utils import euclidean_distance, get_orthogonal_projection
+from geometry_utils import euclidean_distance, get_orthogonal_projection
 
 
 def handle_case_2(greater_list, lesser_list, points):
