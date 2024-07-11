@@ -21,8 +21,8 @@ def get_main_figure(p_list, q_list, annotations=True):
 
 
 def show_medians(p_list, q_list, figure):
-    mp = p_list[len(p_list) // 2]
-    mq = q_list[len(q_list) // 2]
+    mp = get_median_element(p_list)
+    mq = get_median_element(q_list)
 
     st.write("We compute the median mₚ in the P' list as well as the median m₍q₎ in the Q' list."
              " Thus drawing the line that connects them, m = s(mₚ,m₍q₎)")
@@ -44,9 +44,17 @@ def show_angle_example():
     st.image('angles_example.jpg', caption="An example of the angles on two polygons")
 
 
+def get_median_element(polygon):
+    n = len(polygon)
+
+    if n % 2 == 1:
+        return polygon[n//2]  # odd number of elements
+    return polygon[(n//2) - 1]
+
+
 def compute_angles_medians(p_list, q_list):
-    mp = p_list[len(p_list) // 2]
-    mq = q_list[len(q_list) // 2]
+    mp = get_median_element(p_list)
+    mq = get_median_element(q_list)
 
     prev_mp, next_mp = get_neighbour_vertices(p_list, mp)
     prev_mq, next_mq = get_neighbour_vertices(q_list, mq)
@@ -69,7 +77,7 @@ def binary_elimination(p_list, q_list):
         st.write(f"Angle values: α'' = {angles[0]},  α' = {angles[1]},  β'' = {angles[2]},  β' = {angles[3]}")
         p_list, q_list = check_cases(p_list, q_list, medians, angles)
         iteration = iteration + 1
-    # st.info("You can now go to the Final Phase page")
+
     return p_list, q_list
 
 

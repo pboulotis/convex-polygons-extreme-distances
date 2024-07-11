@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objs as go
-from geometry_utils import correct_polygon_position, find_tangents
+from geometry_utils import is_polygon_position_correct, find_tangents
 from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
     get_polygon_vertices, intersection_exists, draw_point, draw_polygon
 from algorithm_init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
@@ -68,8 +68,7 @@ def internal_polygon_exists(polygon_p, polygon_q):
     return False
 
 
-def handle_intersection_and_buttons():
-    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
+def handle_intersection_and_buttons(polygon_p, polygon_q):
     possible_intersection = intersection_exists()
     if possible_intersection:
         figure = visualise_polygons()
@@ -97,28 +96,30 @@ def handle_intersection_and_buttons():
 
 def show_polygon_coordinates_page():
     st.subheader("Initialize Polygons")
-    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
-
     selected_tab = st.radio("Select Polygon, Polygon P (left) and Polygon Q (right)", ["Polygon P", "Polygon Q"])
 
     if selected_tab == "Polygon P":
         initialise_polygon_coordinates_tab("P")
-    else:
+    elif selected_tab == "Polygon Q":
         initialise_polygon_coordinates_tab("Q")
 
-    if polygon_p and polygon_q and not correct_polygon_position(polygon_p, polygon_q):
+    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
+
+    if polygon_p and polygon_q and not is_polygon_position_correct(polygon_p, polygon_q):
         # Swap the polygon coordinates
         st.info("The polygons where given incorrect positions, switching the coordinates")
         temp = polygon_p
         update_vertices(polygon_q, "P")
         update_vertices(temp, "Q")
+        polygon_p = polygon_q
+        polygon_q = temp
     st.subheader("Visualization of both polygons")
     st.plotly_chart(visualise_polygons(), use_container_width=True)
 
     if len(polygon_p) < 3 or len(polygon_q) < 3:
         return
 
-    handle_intersection_and_buttons()
+    handle_intersection_and_buttons(polygon_p, polygon_q)
 
 
 def show_algorithm_page():
@@ -153,12 +154,15 @@ def show_final_phase_page(sidebar=False):
 def show_home_page():
     st.title("Extreme distances between two convex polygons")
     example = st.selectbox("Create your own polygons with 'New' or pick an existing example:",
-                           ["Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "New"])
+                           ["Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "Example 6", "New"])
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     if example == "New":
         if polygon_p and polygon_q:
-            update_vertices([], "P")
-            update_vertices([], "Q")
+            st.write("If you don't want these polygons:")
+            reset = st.button("Reset the coordinates")
+            if reset:
+                update_vertices([], "P")
+                update_vertices([], "Q")
         show_polygon_coordinates_page()
         return
     elif example == "Example 1":
@@ -176,11 +180,14 @@ def show_home_page():
     elif example == "Example 5":
         polygon_p = [(0, 0), (2, 0), (3, 1), (3, 2), (2, 3), (0, 3), (-1, 2), (-1, 1)]
         polygon_q = [(0.5, 1), (1.5, 1), (1.75, 1.5), (1.5, 2), (0.5, 2)]
+    elif example == "Example 6":
+        polygon_p = [(2, 0), (4, 0), (6, 2), (4, 4), (2, 4), (0, 2)]
+        polygon_q = [(11, 2), (13, 2), (14, 4), (12, 6), (10, 4)]
     update_vertices(polygon_p, "P")
     update_vertices(polygon_q, "Q")
     st.plotly_chart(visualise_polygons())
 
-    handle_intersection_and_buttons()
+    handle_intersection_and_buttons(polygon_p, polygon_q)
 
 
 if __name__ == "__main__":

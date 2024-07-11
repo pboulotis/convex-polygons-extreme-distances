@@ -3,18 +3,18 @@ import numpy as np
 from shapely.geometry import Polygon
 
 
-def euclidean_distance(a, b):
+def calculate_euclidean_distance(a, b):
     return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2)
 
 
 #  If this is >0 then a,b,c are assigned counterclockwise
-def calculate_triangle_area(a, b, c):
+def area(a, b, c):
     return 0.5 * (a[0] * b[1] - a[1] * b[0] + a[1] * c[0] - a[0] * c[1] + b[0] * c[1] - b[1] * c[0])
 
 
-def convert_counterclockwise(vertices):
+def convert_to_counterclockwise(vertices):
     for i in range(len(vertices) - 2):
-        if calculate_triangle_area(vertices[i], vertices[i + 1], vertices[i + 2]) < 0:
+        if area(vertices[i], vertices[i + 1], vertices[i + 2]) < 0:
             return [vertices[0]] + vertices[1:][::-1]
     return vertices
 
@@ -58,7 +58,7 @@ def check_polygon_intersection(polygon_p_list, polygon_q_list):
     return intersection_points
 
 
-def correct_polygon_position(polygon_p, polygon_q):
+def is_polygon_position_correct(polygon_p, polygon_q):
     mean1 = np.mean(polygon_p, axis=0)
     mean2 = np.mean(polygon_q, axis=0)
 
@@ -74,7 +74,7 @@ def get_neighbour_vertices(polygon, vertex):
     return polygon[index - 1], polygon[index + 1]
 
 
-def line_equation(point, vertex, test_point):
+def calculate_line_equation(point, vertex, test_point):
     px, py = point
     qx, qy = vertex
     x, y = test_point
@@ -88,8 +88,8 @@ def find_tangents(polygon, point):
 
     for vertex in polygon:
         neighbour_vertices = get_neighbour_vertices(polygon, vertex)
-        res1 = line_equation(point, vertex, neighbour_vertices[0])
-        res2 = line_equation(point, vertex, neighbour_vertices[1])
+        res1 = calculate_line_equation(point, vertex, neighbour_vertices[0])
+        res2 = calculate_line_equation(point, vertex, neighbour_vertices[1])
 
         if res1 <= 0 and res2 <= 0:
             if lower_tangent and lower_tangent[1] < vertex[1]:
@@ -117,7 +117,7 @@ def is_angle_negative(a, b, c):
 
 def get_angle(a, b, c):
     if a == b or b == c or a == c:
-        return 0  # TODO
+        return 0  
 
     a = np.array(a)
     b = np.array(b)
@@ -147,8 +147,9 @@ def calculate_projection_y(c, reverse_slope, x):
 
 
 def is_projection_between_ab_line(a, b, d):
-    total_dist = np.round(euclidean_distance(a, b), 2)
-    return total_dist == (np.round(euclidean_distance(a, d), 2) + np.round(euclidean_distance(b, d), 2))
+    total_dist = np.round(calculate_euclidean_distance(a, b), 2)
+    return total_dist == (np.round(calculate_euclidean_distance(a, d), 2) +
+                          np.round(calculate_euclidean_distance(b, d), 2))
 
 
 def get_orthogonal_projection(a, b, c):
@@ -167,3 +168,4 @@ def get_orthogonal_projection(a, b, c):
     if not is_projection_between_ab_line(a, b, projection_point):
         return False
     return projection_point
+

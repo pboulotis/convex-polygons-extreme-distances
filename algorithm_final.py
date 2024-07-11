@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objs as go
 from algorithm_init import get_p_q_lists
 from polygon_handling import visualise_polygons, draw_vertices
-from geometry_utils import euclidean_distance, get_orthogonal_projection
+from geometry_utils import calculate_euclidean_distance, get_orthogonal_projection
 
 
 def handle_case_2(greater_list, lesser_list, points):
@@ -33,7 +33,7 @@ def find_min_distance(point_list):
     distances = []
 
     for i in range(len(point_list)):
-        distances.append(euclidean_distance(point_list[i][0], point_list[i][1]))
+        distances.append(calculate_euclidean_distance(point_list[i][0], point_list[i][1]))
 
     min_index = distances.index(min(distances))
     return distances[min_index], point_list[min_index]

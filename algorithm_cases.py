@@ -76,16 +76,16 @@ def handle_case2_q(p_list, q_list, mp, angles):
 
 def handle_case3_1(p_list, q_list, medians, angles):
     if angles[1] + angles[3] > 180:
-        if angles[1] > 90:
+        if angles[1] >= 90:
             p_list = get_selected_vertices(p_list, medians[0], p_list[-1])
-        if angles[3] > 90:
+        if angles[3] >= 90:
             q_list = get_selected_vertices(q_list, q_list[0], medians[1])
+
     if angles[0] + angles[2] > 180:
-        if angles[0] > 90:
+        if angles[0] >= 90:
             p_list = get_selected_vertices(p_list, p_list[0], medians[0])
         if angles[2] >= 90:
             q_list = get_selected_vertices(q_list, medians[1], q_list[-1])
-
     return p_list, q_list
 
 
@@ -166,7 +166,7 @@ def check_cases_no_display(p_list, q_list, medians, angles):
     else:
         if angles[0] > 0 and angles[1] > 0 and angles[2] > 0 and angles[3] > 0:
             p_list, q_list = handle_case3_1(p_list, q_list, medians, angles)
-
-        p_list, q_list = handle_case3_2(p_list, q_list, medians, angles)
+        else:
+            p_list, q_list = handle_case3_2(p_list, q_list, medians, angles)
 
     return p_list, q_list

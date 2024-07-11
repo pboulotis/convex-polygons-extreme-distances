@@ -1,11 +1,11 @@
 import streamlit as st
 import numpy as np
 from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_vertices
-from geometry_utils import calculate_triangle_area as area, euclidean_distance
+from geometry_utils import area, calculate_euclidean_distance
 
 
 def add_pair2(pair, pair_list, max_distance):
-    distance = euclidean_distance(pair[0], pair[1])
+    distance = calculate_euclidean_distance(pair[0], pair[1])
     if distance > max_distance:
         pair_list.append(pair)
         max_distance = distance
@@ -62,7 +62,7 @@ def find_max_distance(pair_list):
     max_distance = 0
     vertex_pair = None
     for pair in pair_list:
-        temp_distance = euclidean_distance(pair[0], pair[1])
+        temp_distance = calculate_euclidean_distance(pair[0], pair[1])
         if temp_distance > max_distance:
             max_distance = temp_distance
             vertex_pair = pair

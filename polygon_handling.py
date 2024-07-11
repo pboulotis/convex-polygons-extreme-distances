@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 
-from geometry_utils import is_convex_polygon, convert_counterclockwise, check_polygon_intersection
+from geometry_utils import is_convex_polygon, convert_to_counterclockwise, check_polygon_intersection
 
 polygon_p, polygon_q = [], []
 
@@ -30,9 +30,9 @@ def update_vertices(new_vertices, polygon_name):
         st.error(f"The {polygon_name} polygon is not convex, check the vertices again and"
                  f" that you have typed the coordinates in the correct order")
     if polygon_name == "P":
-        polygon_p = convert_counterclockwise(new_vertices)
+        polygon_p = convert_to_counterclockwise(new_vertices)
     else:
-        polygon_q = convert_counterclockwise(new_vertices)
+        polygon_q = convert_to_counterclockwise(new_vertices)
 
 
 def get_selected_vertices(vertices, start, end):
@@ -74,7 +74,7 @@ def handle_input_file(vertices, polygon_name):
         except ValueError:
             st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line...")
     if vertices:
-        vertices = convert_counterclockwise(vertices)
+        vertices = convert_to_counterclockwise(vertices)
         update_vertices(vertices, polygon_name)
 
 
@@ -114,11 +114,12 @@ def initialise_polygon_coordinates_tab(polygon_name):
             draw_polygon(figure, vertices, "grey", f"{polygon_name}")
             st.plotly_chart(figure)
 
-    st.write("If these are the coordinates you want, press the following button:")
-    locked = st.button(f"Lock coordinates for {polygon_name}")
-    if locked:
-        vertices = convert_counterclockwise(vertices)
-        update_vertices(vertices, polygon_name)
+    if vertices:
+        st.write("If these are the coordinates you want, press the following button:")
+        locked = st.button(f"Lock coordinates for {polygon_name}")
+        if locked:
+            vertices = convert_to_counterclockwise(vertices)
+            update_vertices(vertices, polygon_name)
 
 
 def draw_point(figure, point, color, name):

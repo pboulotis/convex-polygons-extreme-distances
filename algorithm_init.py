@@ -103,7 +103,7 @@ def show_initial_phase_page(sidebar=False):
         return
 
     st.write("We choose u and w, as arbitrary vertices in P and Q, respectively")
-    u, w = polygon_p[0], polygon_q[0]
+    u, w = polygon_p[0], polygon_q[-1]
     if sidebar:
         st.write("You will get the correct result for any vertices selected")
         u, w = change_u_w(polygon_p, polygon_q)
