@@ -116,11 +116,10 @@ def show_initial_phase_page(sidebar=False):
     show_p_q_lists(p_list, q_list)
 
 
-def get_initial_phase_result_no_display():
+def get_initial_phase_result_no_display(polygon_p, polygon_q):
     global p_list, q_list
-    polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     u = polygon_p[0]
-    w = polygon_q[0]
+    w = polygon_q[-1]
     w_lower, w_upper = find_tangents(polygon_q, u)
     u_lower, u_upper = find_tangents(polygon_p, w)
     p_list = get_selected_vertices(polygon_p, u_lower, u_upper)

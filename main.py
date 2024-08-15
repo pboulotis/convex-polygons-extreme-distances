@@ -9,8 +9,8 @@ from algorithm_final import show_min_distance_result
 from max_distance import show_max_distance_page
 
 
-def execute_only_algorithm():
-    p_list, q_list = get_initial_phase_result_no_display()
+def execute_only_algorithm(polygon_p, polygon_q):
+    p_list, q_list = get_initial_phase_result_no_display(polygon_p, polygon_q)
     p_list, q_list = binary_elimination_no_display(p_list, q_list)
     set_p_q_lists(p_list, q_list)
     show_min_distance_result()
@@ -34,14 +34,14 @@ def handle_buttons(polygon_p, polygon_q, label):
             show_algorithm_page()
             show_final_phase_page()
         else:
-            show_max_distance_page()
+            show_max_distance_page(display=True)
     if result_button:
         button2.empty()
         if label == "Minimum":
-            execute_only_algorithm()
+            execute_only_algorithm(polygon_p, polygon_q)
             st.write("You can see all the visualization stages by selecting the pages from the sidebar on the left")
         else:
-            show_max_distance_page(display=False)
+            show_max_distance_page()
 
 
 def internal_polygon_exists(polygon_p, polygon_q):
@@ -202,4 +202,4 @@ if __name__ == "__main__":
     elif page == "Final Phase":
         show_final_phase_page(sidebar=True)
     else:
-        show_max_distance_page()
+        show_max_distance_page(display=True)
