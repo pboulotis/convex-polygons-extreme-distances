@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 from polygon_handling import get_polygon_vertices, visualise_polygons, draw_point, draw_line, draw_vertices, \
-    intersection_exists, get_selected_vertices
+    intersection_exists, get_selected_vertices, internal_polygon_exists
 from geometry_utils import find_tangents
 
 p_list, q_list = None, None
@@ -93,7 +93,7 @@ def show_p_q_lists(p, q):
 def show_initial_phase_page(sidebar=False):
     global p_list, q_list
     st.subheader("Initial Phase")
-    if intersection_exists():
+    if intersection_exists() or internal_polygon_exists():
         return
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
 

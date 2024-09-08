@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly.graph_objs as go
-from geometry_utils import is_polygon_position_correct, find_tangents
+from geometry_utils import is_polygon_position_correct
 from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
-    get_polygon_vertices, intersection_exists, draw_point, draw_polygon
+    get_polygon_vertices, intersection_exists, draw_point, internal_polygon_exists
 from algorithm_init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
 from algorithm import handle_algorithm_page, binary_elimination_no_display
 from algorithm_final import show_min_distance_result
@@ -44,30 +44,6 @@ def handle_buttons(polygon_p, polygon_q, label):
             show_max_distance_page()
 
 
-def internal_polygon_exists(polygon_p, polygon_q):
-    w_lower, w_upper = find_tangents(polygon_q, polygon_p[0])
-    u_lower, u_upper = find_tangents(polygon_p, polygon_q[0])
-    figure = go.Figure()
-    figure.update_xaxes(scaleanchor="y", scaleratio=1)
-
-    if w_lower is None or w_upper is None:
-        st.info("The polygon P is inside the polygon Q")
-        st.write("Therefore the minimum distance is 0, achieved by all points of the interior polygon")
-        draw_polygon(figure, polygon_q, "orange", "Q")
-        draw_polygon(figure, polygon_p, "red", "P is interior polygon")
-        st.plotly_chart(figure)
-        return True
-    elif u_lower is None or u_upper is None:
-        st.info("The polygon Q is inside the polygon P")
-        st.write("Therefore the minimum distance is 0, achieved by all points of the interior polygon")
-        draw_polygon(figure, polygon_p, "cyan", "P")
-        draw_polygon(figure, polygon_q, "red", "Q interior")
-
-        st.plotly_chart(figure)
-        return True
-    return False
-
-
 def handle_intersection_and_buttons(polygon_p, polygon_q):
     possible_intersection = intersection_exists()
     if possible_intersection:
@@ -88,13 +64,13 @@ def handle_intersection_and_buttons(polygon_p, polygon_q):
         st.plotly_chart(figure)
         handle_buttons(polygon_p, polygon_q, "Maximum")
         return
-    if not internal_polygon_exists(polygon_p, polygon_q):
+    if not internal_polygon_exists():
         handle_buttons(polygon_p, polygon_q, "Minimum")
     st.write("---")
     handle_buttons(polygon_p, polygon_q, "Maximum")
 
 
-def show_polygon_coordinates_page():
+def enter_polygon_coordinates():
     st.subheader("Initialize Polygons")
     selected_tab = st.radio("Select Polygon, Polygon P (left) and Polygon Q (right)", ["Polygon P", "Polygon Q"])
 
@@ -124,7 +100,7 @@ def show_polygon_coordinates_page():
 
 def show_algorithm_page():
     st.subheader("Binary Elimination")
-    if intersection_exists():
+    if intersection_exists() or internal_polygon_exists():
         return
 
     p_list, q_list = get_p_q_lists()
@@ -140,7 +116,7 @@ def show_algorithm_page():
 
 def show_final_phase_page(sidebar=False):
     st.subheader("Final Phase")
-    if intersection_exists():
+    if intersection_exists() or internal_polygon_exists():
         return
     if sidebar:
         st.warning("If you have not, go to the 'Binary Elimination' tab first to get the proper results")
@@ -163,7 +139,7 @@ def show_home_page():
             if reset:
                 update_vertices([], "P")
                 update_vertices([], "Q")
-        show_polygon_coordinates_page()
+        enter_polygon_coordinates()
         return
     elif example == "Example 1":
         polygon_p = [(0, 0), (0.5, 0), (1, 0.5), (0.5, 1), (0, 1), (-0.5, 0.5)]

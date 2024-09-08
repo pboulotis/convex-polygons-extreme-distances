@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 
-from geometry_utils import is_convex_polygon, convert_to_counterclockwise, check_polygon_intersection
+from geometry_utils import is_convex_polygon, convert_to_counterclockwise, check_polygon_intersection, find_tangents
 
 polygon_p, polygon_q = [], []
 
@@ -54,6 +54,30 @@ def intersection_exists():
         st.warning("We cannot execute the algorithm for minimum distance since the polygons intersect")
         return possible_intersection
     return None
+
+
+def internal_polygon_exists():
+    w_lower, w_upper = find_tangents(polygon_q, polygon_p[0])
+    u_lower, u_upper = find_tangents(polygon_p, polygon_q[0])
+    figure = go.Figure()
+    figure.update_xaxes(scaleanchor="y", scaleratio=1)
+
+    if w_lower is None or w_upper is None:
+        st.info("The polygon P is inside the polygon Q")
+        st.write("Therefore the minimum distance is 0, achieved by all points of the interior polygon")
+        draw_polygon(figure, polygon_q, "orange", "Q")
+        draw_polygon(figure, polygon_p, "red", "P is interior polygon")
+        st.plotly_chart(figure)
+        return True
+    elif u_lower is None or u_upper is None:
+        st.info("The polygon Q is inside the polygon P")
+        st.write("Therefore the minimum distance is 0, achieved by all points of the interior polygon")
+        draw_polygon(figure, polygon_p, "cyan", "P")
+        draw_polygon(figure, polygon_q, "red", "Q interior")
+
+        st.plotly_chart(figure)
+        return True
+    return False
 
 
 def handle_input_file(vertices, polygon_name):
