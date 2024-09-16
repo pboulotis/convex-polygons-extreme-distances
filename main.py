@@ -129,8 +129,8 @@ def show_final_phase_page(sidebar=False):
 
 def show_home_page():
     st.title("Extreme distances between two convex polygons")
-    example = st.selectbox("Create your own polygons with 'New' or pick an existing example:",
-                           ["Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "Example 6", "New"])
+    options = ["Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "Example 6", "New"]
+    example = st.selectbox("Create your own polygons with 'New' or pick an existing example:", options)
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
     if example == "New":
         if polygon_p and polygon_q:

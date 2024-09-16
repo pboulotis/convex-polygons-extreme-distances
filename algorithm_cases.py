@@ -6,9 +6,9 @@ from geometry_utils import get_orthogonal_projection
 
 def handle_case1_p(q_list, mq, angles):
     if angles[2] >= 90:
-        q_list = get_selected_vertices(q_list, q_list[0], mq)
-    if angles[3] >= 90:
         q_list = get_selected_vertices(q_list, mq, q_list[-1])
+    if angles[3] >= 90:
+        q_list = get_selected_vertices(q_list, q_list[0], mq)
 
     return q_list
 
@@ -39,11 +39,11 @@ def handle_case2_p(p_list, q_list, mq, angles):
             else:
                 p_list = [p_list[0]]
     else:
-        p_list = [p_list[0]]
+        p_list = [p_list[1]]
         if angles[2] >= 180:
-            q_list = get_selected_vertices(q_list, q_list[0], mq)
-        if angles[3] >= 180:
             q_list = get_selected_vertices(q_list, mq, q_list[-1])
+        if angles[3] >= 180:
+            q_list = get_selected_vertices(q_list, q_list[0], mq)
 
     return p_list, q_list
 
@@ -146,8 +146,8 @@ def check_cases(p_list, q_list, medians, angles):
         st.write("Case 3")
         if angles[0] > 0 and angles[1] > 0 and angles[2] > 0 and angles[3] > 0:
             p_list, q_list = handle_case3_1(p_list, q_list, medians, angles)
-
-        p_list, q_list = handle_case3_2(p_list, q_list, medians, angles)
+        else:
+            p_list, q_list = handle_case3_2(p_list, q_list, medians, angles)
 
     show_figure(p_list, q_list)
 
