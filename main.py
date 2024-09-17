@@ -1,5 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
+
+import tester
 from geometry_utils import is_polygon_position_correct
 from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
     get_polygon_vertices, intersection_exists, draw_point, internal_polygon_exists
@@ -129,10 +131,13 @@ def show_final_phase_page(sidebar=False):
 
 def show_home_page():
     st.title("Extreme distances between two convex polygons")
-    options = ["Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "Example 6", "New"]
+    options = ["Select", "Example 1", "Example 2", "Example 3", "Example 4", "Example 5", "Example 6", "New"]
     example = st.selectbox("Create your own polygons with 'New' or pick an existing example:", options)
     polygon_p, polygon_q = get_polygon_vertices("P"), get_polygon_vertices("Q")
-    if example == "New":
+    if example == "Select":
+        if not polygon_p and not polygon_q:
+            return
+    elif example == "New":
         if polygon_p and polygon_q:
             st.write("If you don't want these polygons:")
             reset = st.button("Reset the coordinates")
@@ -168,7 +173,7 @@ def show_home_page():
 
 if __name__ == "__main__":
     page = st.sidebar.selectbox("Select Page", ["Home", "Initial Phase",
-                                                "Binary Elimination", "Final Phase", "Maximum Distance"])
+                                                "Binary Elimination", "Final Phase", "Maximum Distance", "Test"])
     if page == "Home":
         show_home_page()
     elif page == "Initial Phase":
@@ -177,5 +182,7 @@ if __name__ == "__main__":
         show_algorithm_page()
     elif page == "Final Phase":
         show_final_phase_page(sidebar=True)
-    else:
+    elif page == "Maximum Distance":
         show_max_distance_page(display=True)
+    else:
+        tester.handle_test()

@@ -168,4 +168,3 @@ def get_orthogonal_projection(a, b, c):
     if not is_projection_between_ab_line(a, b, projection_point):
         return False
     return projection_point
-

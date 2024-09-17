@@ -29,6 +29,12 @@ def update_vertices(new_vertices, polygon_name):
     if new_vertices and not is_convex_polygon(new_vertices):
         st.error(f"The {polygon_name} polygon is not convex, check the vertices again and"
                  f" that you have typed the coordinates in the correct order")
+
+    # To ensure no duplication happens
+    for vertex in new_vertices:
+        if vertex in polygon_p or vertex in polygon_q:
+            return
+
     if polygon_name == "P":
         polygon_p = convert_to_counterclockwise(new_vertices)
     else:
