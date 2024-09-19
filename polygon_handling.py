@@ -29,11 +29,10 @@ def update_vertices(new_vertices, polygon_name):
     if new_vertices and not is_convex_polygon(new_vertices):
         st.error(f"The {polygon_name} polygon is not convex, check the vertices again and"
                  f" that you have typed the coordinates in the correct order")
-
-    # To ensure no duplication happens
-    for vertex in new_vertices:
-        if vertex in polygon_p or vertex in polygon_q:
-            return
+        figure = go.Figure()
+        draw_polygon(figure, new_vertices, "red", f"{polygon_name}")
+        st.plotly_chart(figure)
+        return
 
     if polygon_name == "P":
         polygon_p = convert_to_counterclockwise(new_vertices)
@@ -100,7 +99,8 @@ def handle_input_file(vertices, polygon_name):
     for line in file_lines:
         try:
             x, y = map(float, line.split(','))
-            vertices.append((x, y))
+            if (x, y) not in vertices:
+                vertices.append((x, y))
         except ValueError:
             st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line...")
     if vertices:
@@ -125,6 +125,11 @@ def initialise_polygon_coordinates_tab(polygon_name):
     vertices = get_polygon_vertices(polygon_name)
     handle_input_file(vertices, polygon_name)
 
+    if not is_convex_polygon(vertices):
+        st.error("We cannot save this polygon")
+        update_vertices([], polygon_name)
+        return
+
     selected_option = st.checkbox(f"Type the coordinates manually for {polygon_name}")
     if selected_option:
         vertices = []
@@ -144,12 +149,11 @@ def initialise_polygon_coordinates_tab(polygon_name):
             draw_polygon(figure, vertices, "grey", f"{polygon_name}")
             st.plotly_chart(figure)
 
-    if vertices:
-        st.write("If these are the coordinates you want, press the following button:")
-        locked = st.button(f"Lock coordinates for {polygon_name}")
-        if locked:
-            vertices = convert_to_counterclockwise(vertices)
-            update_vertices(vertices, polygon_name)
+            st.write("If these are the coordinates you want, press the following button:")
+            locked = st.button(f"Lock coordinates for {polygon_name}")
+            if locked:
+                vertices = convert_to_counterclockwise(vertices)
+                update_vertices(vertices, polygon_name)
 
 
 def draw_point(figure, point, color, name):

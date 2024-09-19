@@ -1,8 +1,7 @@
 import streamlit as st
 import plotly.graph_objs as go
 
-import tester
-from geometry_utils import is_polygon_position_correct
+from geometry_utils import is_polygon_position_correct, is_convex_polygon
 from polygon_handling import visualise_polygons, update_vertices, initialise_polygon_coordinates_tab, \
     get_polygon_vertices, intersection_exists, draw_point, internal_polygon_exists
 from algorithm_init import show_initial_phase_page, get_p_q_lists, set_p_q_lists, get_initial_phase_result_no_display
@@ -164,16 +163,18 @@ def show_home_page():
     elif example == "Example 6":
         polygon_p = [(2, 0), (4, 0), (6, 2), (4, 4), (2, 4), (0, 2)]
         polygon_q = [(11, 2), (13, 2), (14, 4), (12, 6), (10, 4)]
+
     update_vertices(polygon_p, "P")
     update_vertices(polygon_q, "Q")
     st.plotly_chart(visualise_polygons())
 
-    handle_intersection_and_buttons(polygon_p, polygon_q)
+    if is_convex_polygon(polygon_p) and is_convex_polygon(polygon_q):
+        handle_intersection_and_buttons(polygon_p, polygon_q)
 
 
 if __name__ == "__main__":
     page = st.sidebar.selectbox("Select Page", ["Home", "Initial Phase",
-                                                "Binary Elimination", "Final Phase", "Maximum Distance", "Test"])
+                                                "Binary Elimination", "Final Phase", "Maximum Distance"])
     if page == "Home":
         show_home_page()
     elif page == "Initial Phase":
@@ -182,7 +183,5 @@ if __name__ == "__main__":
         show_algorithm_page()
     elif page == "Final Phase":
         show_final_phase_page(sidebar=True)
-    elif page == "Maximum Distance":
-        show_max_distance_page(display=True)
     else:
-        tester.handle_test()
+        show_max_distance_page(display=True)
