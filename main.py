@@ -137,7 +137,7 @@ def show_home_page():
         if not polygon_p and not polygon_q:
             return
     elif example == "New":
-        if polygon_p and polygon_q:
+        if polygon_p or polygon_q:
             st.write("If you don't want these polygons:")
             reset = st.button("Reset the coordinates")
             if reset:

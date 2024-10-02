@@ -6,27 +6,36 @@ from polygon_handling import visualise_polygons, draw_vertices
 from geometry_utils import calculate_euclidean_distance, get_orthogonal_projection
 
 
-def handle_case_2(greater_list, lesser_list, points):
-    points.append([greater_list[0], lesser_list[0]])
-    points.append([greater_list[1], lesser_list[0]])
-
-    projection = get_orthogonal_projection(greater_list[0], greater_list[1], lesser_list[0])
+def add_projection(edge, vertex_projected, points):
+    st.write(edge)
+    projection = get_orthogonal_projection(edge[0], edge[1], vertex_projected)
     if projection:
-        points.append([projection, lesser_list[0]])
+        points.append([projection, vertex_projected])
+
+
+def handle_case_2(greater_list, lesser_list):
+    points = [[greater_list[0], lesser_list[0]], [greater_list[1], lesser_list[0]]]
+    add_projection(greater_list, lesser_list[0], points)
+    return points
+
+
+def handle_case_3(p_list, q_list):
+    points = [[p_list[0], q_list[0]], [p_list[0], q_list[1]], [p_list[1], q_list[0]], [p_list[1], q_list[1]]]
+    add_projection(p_list, q_list[0], points)
+    add_projection(p_list, q_list[1], points)
+    add_projection(q_list, p_list[0], points)
+    add_projection(q_list, p_list[1], points)
     return points
 
 
 def handle_final_cases(p_list, q_list):
-    points = []
     if len(p_list) == len(q_list) == 1:
         return [[p_list[0], q_list[0]]]
     elif len(p_list) == 2 and len(q_list) == 1:
-        return handle_case_2(p_list, q_list, points)
+        return handle_case_2(p_list, q_list)
     elif len(q_list) == 2 and len(p_list) == 1:
-        return handle_case_2(q_list, p_list, points)
-    else:
-        points = handle_case_2(p_list, q_list, points)
-        return handle_case_2(q_list, p_list, points)
+        return handle_case_2(q_list, p_list)
+    return handle_case_3(p_list, q_list)
 
 
 def find_min_distance(point_list):

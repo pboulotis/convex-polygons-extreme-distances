@@ -50,18 +50,6 @@ def get_antipodal_pairs(max_distance, pair_list, p, q):
     return pair_list, max_distance
 
 
-# def find_max_distance(pair_list):
-#     max_distance = 0
-#     vertex_pair = None
-#     for pair in pair_list:
-#         temp_distance = calculate_euclidean_distance(pair[0], pair[1])
-#         if temp_distance > max_distance:
-#             max_distance = temp_distance
-#             vertex_pair = pair
-#
-#     return vertex_pair, max_distance
-
-
 def display_pairs(pair_list, label1, label2):
     for pair in range(len(pair_list)):
         st.write(f"{pair + 1})")

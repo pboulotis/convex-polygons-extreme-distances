@@ -103,9 +103,6 @@ def handle_input_file(vertices, polygon_name):
                 vertices.append((x, y))
         except ValueError:
             st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line...")
-    if vertices:
-        vertices = convert_to_counterclockwise(vertices)
-        update_vertices(vertices, polygon_name)
 
 
 def initialise_vertices_manually(num_vertices, vertices, polygon_name):
@@ -124,11 +121,6 @@ def initialise_vertices_manually(num_vertices, vertices, polygon_name):
 def initialise_polygon_coordinates_tab(polygon_name):
     vertices = get_polygon_vertices(polygon_name)
     handle_input_file(vertices, polygon_name)
-
-    if not is_convex_polygon(vertices):
-        st.error("We cannot save this polygon")
-        update_vertices([], polygon_name)
-        return
 
     selected_option = st.checkbox(f"Type the coordinates manually for {polygon_name}")
     if selected_option:
@@ -154,6 +146,11 @@ def initialise_polygon_coordinates_tab(polygon_name):
             if locked:
                 vertices = convert_to_counterclockwise(vertices)
                 update_vertices(vertices, polygon_name)
+
+        if not is_convex_polygon(vertices):
+            st.error("We cannot save this polygon")
+            update_vertices([], polygon_name)
+            return
 
 
 def draw_point(figure, point, color, name):
