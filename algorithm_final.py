@@ -7,7 +7,6 @@ from geometry_utils import calculate_euclidean_distance, get_orthogonal_projecti
 
 
 def add_projection(edge, vertex_projected, points):
-    st.write(edge)
     projection = get_orthogonal_projection(edge[0], edge[1], vertex_projected)
     if projection:
         points.append([projection, vertex_projected])
