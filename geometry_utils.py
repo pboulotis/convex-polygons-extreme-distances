@@ -26,11 +26,15 @@ def cross_product(a, b, c):
 
 
 def is_convex_polygon(vertices):
+    n = len(vertices)
     if not vertices:
         return True
-    for i in range(len(vertices) - 2):
+    for i in range(n - 2):
         if cross_product(vertices[i], vertices[i + 1], vertices[i + 2]) < 0:
             return False
+    if (cross_product(vertices[n - 2], vertices[n - 1], vertices[0]) < 0 or
+            cross_product(vertices[n - 1], vertices[0], vertices[1]) < 0):
+        return False
     return True
 
 

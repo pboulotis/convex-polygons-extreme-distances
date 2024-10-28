@@ -103,6 +103,10 @@ def handle_input_file(vertices, polygon_name):
                 vertices.append((x, y))
         except ValueError:
             st.warning(f"Invalid format in line: {line}. Please use the format 'x,y'. Skipping this line...")
+    if vertices:
+        update_vertices(vertices, polygon_name)
+        if not is_convex_polygon(vertices):
+            update_vertices([], polygon_name)
 
 
 def initialise_vertices_manually(num_vertices, vertices, polygon_name):
